@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { App } from "./components/App";
 import "./index.css";
 import dotenv from "dotenv";
@@ -9,7 +9,7 @@ import { BrowserRouter } from "react-router-dom";
 
 dotenv.config();
 
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: {
     primary: {
       light: "#9a67ea",

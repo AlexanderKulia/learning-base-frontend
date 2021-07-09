@@ -1,20 +1,9 @@
-import React, { KeyboardEvent, useEffect, useRef } from "react";
+import React, { KeyboardEvent, useRef } from "react";
 import { makeStyles, TextField, Button, Grid, Chip } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
 import { useFormik } from "formik";
 
-const useStyles = makeStyles((theme) => ({
-  tag: {
-    display: "block",
-    padding: "5px",
-    backgroundColor: "green",
-    borderRadius: "10px",
-    margin: "0px 2px",
-    whiteSpace: "nowrap"
-  },
-  tagContainer: {
-    flexWrap: "wrap"
-  }
-}));
+const useStyles = makeStyles((theme) => ({}));
 
 interface FormValues {
   title: string;
@@ -42,51 +31,6 @@ export const NoteCreate = () => {
     }
   });
   const tagFieldRef = useRef<HTMLInputElement>(null);
-
-  const renderTags = formik.values.tags.map((tag) => {
-    return (
-      <Chip
-        key={tag}
-        size="small"
-        label={tag}
-        onDelete={() => {
-          console.log("DELETED");
-        }}
-        className={classes.tag}
-      />
-    );
-  });
-
-  const shouldShrinkTagField = () => {
-    return !!tagFieldRef?.current?.value || tagFieldRef?.current?.previousElementSibling?.tagName === "SPAN";
-  };
-
-  const renderTag = () => {
-    const tag = document.createElement("span");
-    tag.innerHTML = formik.values._tag;
-    tag.style.cssText =
-      "display:block;padding:5px;background-color:#ebebeb;border-radius:10px;margin:15px 2px;white-space:nowrap";
-    tag.addEventListener("click", (e: MouseEvent) => {
-      const target = e.target as HTMLSpanElement;
-      target.remove();
-    });
-    return tag;
-  };
-
-  const handleAddTag = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.code === "Tab" && formik.values._tag !== "") {
-      tagFieldRef?.current?.parentNode?.insertBefore(renderTag(), tagFieldRef?.current);
-      formik.setFieldValue("tags", [...formik.values.tags, formik.values._tag]);
-      formik.setFieldValue("_tag", "");
-    }
-  };
-
-  // useEffect(() => {
-  //   const tagFieldFormControl = document.getElementById("_tag")?.parentElement;
-  //   if (tagFieldFormControl) {
-  //     tagFieldFormControl.style.flexWrap = "wrap";
-  //   }
-  // }, []);
 
   return (
     <Grid container>
@@ -124,24 +68,31 @@ export const NoteCreate = () => {
             id="content"
             name="content"
           />
-          <TextField
-            value={formik.values._tag}
-            onChange={formik.handleChange}
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            label="Tags"
-            type="text"
+          <Autocomplete
+            multiple
+            size="small"
             id="_tag"
-            name="_tag"
-            inputRef={tagFieldRef}
-            InputLabelProps={{ shrink: shouldShrinkTagField() }}
-            onKeyDown={handleAddTag}
-            className={classes.tagContainer}
-          ></TextField>
-
-          <Grid container justify="flex-end">
+            options={[{ title: "tag1" }, { title: "tag2" }].map((option) => option.title)}
+            freeSolo
+            open={false}
+            value={formik.values.tags}
+            onChange={(e, value) => {
+              formik.setFieldValue("tags", value);
+            }}
+            inputValue={formik.values._tag}
+            onInputChange={(e, value) => {
+              formik.setFieldValue("_tag", value);
+            }}
+            renderTags={(value: string[], getTagProps) =>
+              value.map((option: string, index: number) => (
+                <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField margin="normal" {...params} variant="outlined" label="Tags" placeholder="Add tag" />
+            )}
+          />
+          <Grid container justifyContent="flex-end">
             <Grid item>
               <Button disabled={formik.isSubmitting} type="submit" fullWidth variant="contained" color="primary">
                 Submit

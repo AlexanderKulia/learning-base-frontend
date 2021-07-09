@@ -2,7 +2,8 @@ import { AxiosResponse } from "axios";
 import React, { createContext, useContext, FunctionComponent, useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import jwt_decode from "jwt-decode";
-import { apiClient } from "../utils/apiClient";
+import { AuthApi } from "../services/api";
+import { apiClient } from "../services/api/base";
 
 const AuthContext = createContext({} as any);
 
@@ -31,14 +32,11 @@ export const AuthProvider: FunctionComponent = ({ children }): JSX.Element => {
   const history = useHistory();
 
   const signUp = async (email: string, password: string): Promise<AxiosResponse<{ message: string }>> => {
-    return await apiClient.post("/auth/signup", { email, password });
+    return await AuthApi.signUp(email, password);
   };
 
   const signIn = async (email: string, password: string): Promise<void> => {
-    const res = await apiClient.post<{ accessToken: string }>("/auth/signin", {
-      email,
-      password
-    });
+    const res = await AuthApi.signIn(email, password);
     const accessToken = res.data.accessToken;
     setAccessToken(accessToken);
     setCurrentUser(jwt_decode<AccessTokenPayload>(accessToken));
@@ -47,25 +45,20 @@ export const AuthProvider: FunctionComponent = ({ children }): JSX.Element => {
   };
 
   const logout = async (): Promise<void> => {
-    await apiClient.get<boolean>("/auth/logout");
+    await AuthApi.logOut();
     setAccessToken(null);
     setCurrentUser(null);
     history.push("/signin");
     window.localStorage.setItem("logout", Date.now().toString());
   };
 
-  const verifyCurrentUser = async (): Promise<boolean> => {
-    const res = await apiClient.get<boolean>("/auth/verify_user");
-    return res.data;
-  };
-
   useEffect(() => {
     const refreshToken = async () => {
-      const refreshTokenExists = await verifyCurrentUser();
+      const refreshTokenExists = (await AuthApi.verifyCurrentUser()).data;
 
       if (refreshTokenExists) {
         try {
-          const res = await apiClient.post<{ accessToken: string }>("/auth/refresh_token");
+          const res = await AuthApi.refreshToken();
           const newAccessToken = res.data.accessToken;
           apiClient.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
 

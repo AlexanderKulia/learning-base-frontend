@@ -19,3 +19,13 @@ apiClient.interceptors.response.use(
     }
   }
 );
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    return Promise.reject(error.response.data);
+  }
+);
+
+const { get, post, put, delete: destroy, patch } = apiClient;
+export { get, post, put, destroy, patch };
