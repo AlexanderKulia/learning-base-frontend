@@ -6,6 +6,7 @@ import "./index.css";
 import dotenv from "dotenv";
 import { AuthProvider } from "./contexts/AuthContext";
 import { BrowserRouter } from "react-router-dom";
+import { DialogProvider } from "./contexts/ModalContext";
 
 dotenv.config();
 
@@ -33,14 +34,14 @@ const theme = createTheme({
 });
 
 ReactDOM.render(
-  <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <AuthProvider>
+  <ThemeProvider theme={theme}>
+    <BrowserRouter>
+      <AuthProvider>
+        <DialogProvider>
           <App />
-        </AuthProvider>
-      </BrowserRouter>
-    </ThemeProvider>
-  </React.StrictMode>,
+        </DialogProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </ThemeProvider>,
   document.getElementById("root")
 );

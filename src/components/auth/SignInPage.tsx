@@ -49,7 +49,7 @@ export const SignInPage = () => {
   });
 
   return (
-    <Grid container direction="column" justify="center" alignItems="center" className={classes.root}>
+    <Grid container direction="column" justifyContent="center" alignItems="center" className={classes.root}>
       <Grid item xs={3} className={classes.paperContainer}>
         <Paper variant="outlined" square elevation={0} className={classes.paper}>
           <Typography variant="h5">Sign in</Typography>

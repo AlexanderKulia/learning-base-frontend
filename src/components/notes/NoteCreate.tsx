@@ -2,6 +2,7 @@ import React, { KeyboardEvent, useRef } from "react";
 import { makeStyles, TextField, Button, Grid, Chip } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { useFormik } from "formik";
+import { NotesApi } from "../../services/api/index";
 
 const useStyles = makeStyles((theme) => ({}));
 
@@ -22,11 +23,12 @@ export const NoteCreate = () => {
   };
   const formik = useFormik({
     initialValues,
-    onSubmit: async (values) => {
+    onSubmit: async ({ title, content, tags }) => {
       try {
-        alert(JSON.stringify(values));
+        alert(JSON.stringify({ title, content, tags }));
+        await NotesApi.create({ title, content, tags });
       } catch (error) {
-        alert("Failed to sign in");
+        alert("Failed to create a note");
       }
     }
   });
