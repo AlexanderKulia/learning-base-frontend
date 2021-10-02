@@ -1,5 +1,6 @@
 import React, { FunctionComponent } from "react";
-import { Route, Switch, useLocation } from "react-router-dom";
+import { Switch, useLocation } from "react-router-dom";
+import { ThemeProvider, createMuiTheme, makeStyles } from "@material-ui/core/styles";
 import { AppBar } from "./AppBar";
 import { Drawer } from "./Drawer";
 import { NoteList } from "./notes/NoteList";
@@ -11,25 +12,29 @@ import { PrivateRoute } from "./PrivateRoute";
 import { LoginContainer } from "./auth/LoginContainer";
 import { AppContainer } from "./AppContainer";
 
+const theme = createMuiTheme();
+
 export const App: FunctionComponent = (): JSX.Element => {
   const { pathname } = useLocation();
   const excludeNavFrom = ["/signin", "/signup"];
 
   return (
     <>
-      <LoginContainer />
-      <AppContainer>
-        {!excludeNavFrom.includes(pathname) && <AppBar />}
-        {!excludeNavFrom.includes(pathname) && <Drawer />}
-        <MainContainer>
-          <Switch>
-            <PrivateRoute exact path="/" component={NoteList}></PrivateRoute>
-            <PrivateRoute exact path="/notes/new" component={NoteCreate}></PrivateRoute>
-            <PrivateRoute exact path="/notes/:id" component={NoteEdit}></PrivateRoute>
-            <PrivateRoute exact path="/notes/delete/:id" component={NoteDelete}></PrivateRoute>
-          </Switch>
-        </MainContainer>
-      </AppContainer>
+      <ThemeProvider theme={theme}>
+        <LoginContainer />
+        <AppContainer>
+          {!excludeNavFrom.includes(pathname) && <AppBar />}
+          {!excludeNavFrom.includes(pathname) && <Drawer />}
+          <MainContainer>
+            <Switch>
+              <PrivateRoute exact path="/" component={NoteList}></PrivateRoute>
+              <PrivateRoute exact path="/notes/new" component={NoteCreate}></PrivateRoute>
+              <PrivateRoute exact path="/notes/:id" component={NoteEdit}></PrivateRoute>
+              <PrivateRoute exact path="/notes/delete/:id" component={NoteDelete}></PrivateRoute>
+            </Switch>
+          </MainContainer>
+        </AppContainer>
+      </ThemeProvider>
     </>
   );
 };
