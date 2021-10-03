@@ -1,17 +1,13 @@
-import React, { useEffect } from "react";
-import { AppBar as MuiAppBar, Toolbar, Typography, Button, Link } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core";
-import { useAuth } from "../contexts/AuthContext";
+/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
+/** @jsxImportSource @emotion/react */
+import React from "react";
+import { AppBar as MuiAppBar, Toolbar, Typography, Button, Link, useTheme } from "@mui/material";
+import { css } from "@emotion/react";
 import { useHistory, Link as RouterLink } from "react-router-dom";
-
-const useStyles = makeStyles((theme) => ({
-  appBar: { zIndex: theme.zIndex.drawer + 1, flexGrow: 1 },
-  titleContainer: { flexGrow: 1 },
-  homeLink: { color: "#ffffff", textDecoration: "none" }
-}));
+import { useAuth } from "../contexts/AuthContext";
 
 export const AppBar = () => {
-  const classes = useStyles();
+  const theme = useTheme();
   const { currentUser, logout } = useAuth();
   const history = useHistory();
 
@@ -25,9 +21,20 @@ export const AppBar = () => {
   };
 
   return (
-    <MuiAppBar position="fixed" color="primary" className={classes.appBar}>
+    <MuiAppBar
+      position="fixed"
+      color="primary"
+      css={css`
+        z-index: ${theme.zIndex.drawer + 1};
+        flex-row: 1;
+      `}
+    >
       <Toolbar>
-        <div className={classes.titleContainer}>
+        <div
+          css={css`
+            flex-grow: 1;
+          `}
+        >
           <Link color="inherit" variant="h6" underline="none" component={RouterLink} to="/">
             Learning Base
           </Link>

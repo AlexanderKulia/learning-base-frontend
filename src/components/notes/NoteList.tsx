@@ -1,19 +1,15 @@
+/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
+/** @jsxImportSource @emotion/react */
 import React, { useEffect } from "react";
-import { makeStyles, Paper, Typography, Button, Link } from "@material-ui/core";
+import { Paper, Typography, Button, Link, useTheme } from "@mui/material";
 import { useState } from "react";
+import { css } from "@emotion/react";
 import { Link as RouterLink } from "react-router-dom";
 import { NotesApi } from "../../services/api/index";
 import { useDialog } from "../../contexts/ModalContext";
 
-const useStyles = makeStyles((theme) => ({
-  noteCard: { width: "30%", padding: theme.spacing(1), marginBottom: theme.spacing(1) },
-  noteTitle: {},
-  noteContent: {},
-  createButton: { marginBottom: theme.spacing(1) }
-}));
-
 export const NoteList = () => {
-  const classes = useStyles();
+  const theme = useTheme();
   const [notes, setNotes] = useState<{ id: number; title: string; content: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const { handleModal } = useDialog();
@@ -35,7 +31,13 @@ export const NoteList = () => {
     return (
       <>
         <Link color="inherit" underline="none" component={RouterLink} to="/notes/new">
-          <Button variant="contained" color="primary" className={classes.createButton}>
+          <Button
+            variant="contained"
+            color="primary"
+            css={css`
+              margin-bottom: ${theme.spacing(1)};
+            `}
+          >
             New
           </Button>
         </Link>
@@ -54,13 +56,18 @@ export const NoteList = () => {
 
   const renderNotes = notes.map((note) => {
     return (
-      <Paper key={note.id} elevation={0} variant="outlined" className={classes.noteCard}>
-        <Typography variant="h6" className={classes.noteTitle}>
-          {note.title}
-        </Typography>
-        <Typography variant="body1" className={classes.noteContent}>
-          {note.content}
-        </Typography>
+      <Paper
+        key={note.id}
+        elevation={0}
+        variant="outlined"
+        css={css`
+          width: 30%;
+          padding: ${theme.spacing(1)};
+          margin-bottom: ${theme.spacing(1)};
+        `}
+      >
+        <Typography variant="h6">{note.title}</Typography>
+        <Typography variant="body1">{note.content}</Typography>
       </Paper>
     );
   });

@@ -1,34 +1,30 @@
+/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
+/** @jsxImportSource @emotion/react */
 import React from "react";
-import { Drawer as MuiDrawer, List, ListItem, ListItemText, makeStyles, Toolbar } from "@material-ui/core";
+import { css } from "@emotion/react";
+import { Drawer as MuiDrawer, List, ListItem, ListItemText, Toolbar } from "@mui/material";
 
 export const drawerWidth = 96;
 
-const useStyles = makeStyles((theme) => ({
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0
-  },
-  drawerPaper: {
-    width: drawerWidth
-  },
-  drawerContainer: {
-    overflow: "auto"
-  }
-}));
-
 export const Drawer = () => {
-  const classes = useStyles();
-
   return (
     <MuiDrawer
       variant="permanent"
-      className={classes.drawer}
-      classes={{
-        paper: classes.drawerPaper
-      }}
+      css={css`
+        width: ${drawerWidth}px;
+        flex-shrink: 0;
+        & .MuiDrawer-paper {
+          width: ${drawerWidth}px;
+          box-sizing: border-box;
+        }
+      `}
     >
       <Toolbar />
-      <div className={classes.drawerContainer}>
+      <div
+        css={css`
+          overflow: auto;
+        `}
+      >
         <List>
           {["Tags"].map((text, index) => (
             <ListItem button key={text}>

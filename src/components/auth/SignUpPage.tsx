@@ -1,28 +1,11 @@
+/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
+/** @jsxImportSource @emotion/react */
 import React from "react";
-import { makeStyles, Paper, Typography, Grid, TextField, Button, Link } from "@material-ui/core";
+import { Paper, Typography, Grid, TextField, Button, Link, useTheme } from "@mui/material";
 import { Link as RouterLink, useHistory } from "react-router-dom";
 import { useFormik } from "formik";
+import { css } from "@emotion/react";
 import { useAuth } from "../../contexts/AuthContext";
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    minHeight: "100vh"
-  },
-  paperContainer: { width: "20%" },
-  paper: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: theme.spacing(4)
-  },
-  form: {
-    width: "100%",
-    marginTop: theme.spacing(1)
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2)
-  }
-}));
 
 const validate = (values: FormValues) => {
   const errors: Partial<FormValues> = {};
@@ -57,7 +40,7 @@ interface FormValues {
 }
 
 export const SignUpPage = () => {
-  const classes = useStyles();
+  const theme = useTheme();
   const { signUp } = useAuth();
   const history = useHistory();
   const initialValues: FormValues = {
@@ -79,11 +62,42 @@ export const SignUpPage = () => {
   });
 
   return (
-    <Grid container direction="column" justifyContent="center" alignItems="center" className={classes.root}>
-      <Grid item xs={3} className={classes.paperContainer}>
-        <Paper variant="outlined" square elevation={0} className={classes.paper}>
+    <Grid
+      container
+      direction="column"
+      justifyContent="center"
+      alignItems="center"
+      css={css`
+        min-height: 100vh;
+      `}
+    >
+      <Grid
+        item
+        xs={3}
+        css={css`
+          width: 20%;
+        `}
+      >
+        <Paper
+          variant="outlined"
+          square
+          elevation={0}
+          css={css`
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: ${theme.spacing(4)};
+          `}
+        >
           <Typography variant="h5">Sign up</Typography>
-          <form className={classes.form} noValidate onSubmit={formik.handleSubmit}>
+          <form
+            css={css`
+              width: 100%;
+              margin-top: ${theme.spacing(1)};
+            `}
+            noValidate
+            onSubmit={formik.handleSubmit}
+          >
             <TextField
               value={formik.values.email}
               onChange={formik.handleChange}
@@ -140,11 +154,13 @@ export const SignUpPage = () => {
               fullWidth
               variant="contained"
               color="primary"
-              className={classes.submit}
+              css={css`
+                margin: ${theme.spacing(3, 0, 2)};
+              `}
             >
               Sign Up
             </Button>
-            <Grid container justify="flex-end">
+            <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link component={RouterLink} to="/signin" variant="body2">
                   Already have an account? Sign in

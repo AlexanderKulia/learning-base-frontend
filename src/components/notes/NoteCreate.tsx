@@ -1,10 +1,8 @@
 import React, { KeyboardEvent, useRef } from "react";
-import { makeStyles, TextField, Button, Grid, Chip } from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
+import { TextField, Button, Grid, Chip } from "@mui/material";
+import { Autocomplete } from "@mui/material";
 import { useFormik } from "formik";
 import { NotesApi } from "../../services/api/index";
-
-const useStyles = makeStyles((theme) => ({}));
 
 interface FormValues {
   title: string;
@@ -14,7 +12,6 @@ interface FormValues {
 }
 
 export const NoteCreate = () => {
-  const classes = useStyles();
   const initialValues: FormValues = {
     title: "",
     content: "",

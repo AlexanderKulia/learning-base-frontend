@@ -1,19 +1,20 @@
+/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
+/** @jsxImportSource @emotion/react */
 import React from "react";
-import { makeStyles, Toolbar } from "@material-ui/core";
+import { Toolbar, useTheme } from "@mui/material";
+import { css } from "@emotion/react";
 import { FunctionComponent } from "react";
 
-const useStyles = makeStyles((theme) => ({
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing(3)
-  }
-}));
-
 export const MainContainer: FunctionComponent = ({ children }): JSX.Element => {
-  const classes = useStyles();
+  const theme = useTheme();
 
   return (
-    <div className={classes.content}>
+    <div
+      css={css`
+        flex-grow: 1;
+        padding: ${theme.spacing(3)};
+      `}
+    >
       <Toolbar />
       {children}
     </div>

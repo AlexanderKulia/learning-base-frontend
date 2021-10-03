@@ -1,7 +1,5 @@
 import React from "react";
-import { makeStyles, Typography } from "@material-ui/core";
-
-const useStyles = makeStyles((theme) => ({}));
+import { Typography } from "@mui/material";
 
 export const NoteDelete = () => {
   return <Typography paragraph>Delete note</Typography>;

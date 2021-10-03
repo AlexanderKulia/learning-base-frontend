@@ -1,14 +1,18 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
+import { createTheme, ThemeProvider, Theme } from "@mui/material/styles";
+import dotenv from "dotenv";
+import { BrowserRouter } from "react-router-dom";
 import { App } from "./components/App";
 import "./index.css";
-import dotenv from "dotenv";
 import { AuthProvider } from "./contexts/AuthContext";
-import { BrowserRouter } from "react-router-dom";
 import { DialogProvider } from "./contexts/ModalContext";
 
 dotenv.config();
+
+declare module "@mui/material/styles" {
+  interface DefaultTheme extends Theme {}
+}
 
 const theme = createTheme({
   palette: {
@@ -23,12 +27,16 @@ const theme = createTheme({
       dark: "#003c8f"
     }
   },
-  props: {
+  components: {
     MuiButton: {
-      disableElevation: true
+      defaultProps: {
+        disableElevation: true
+      }
     },
     MuiAppBar: {
-      elevation: 0
+      defaultProps: {
+        elevation: 0
+      }
     }
   }
 });
