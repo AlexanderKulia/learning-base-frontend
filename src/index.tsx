@@ -6,7 +6,8 @@ import { BrowserRouter } from "react-router-dom";
 import { App } from "./components/App";
 import "./index.css";
 import { AuthProvider } from "./contexts/AuthContext";
-import { DialogProvider } from "./contexts/ModalContext";
+import { DialogProvider } from "./contexts/DialogContext";
+import { SnackbarProvider } from "./contexts/SnackbarContext";
 
 dotenv.config();
 
@@ -37,6 +38,11 @@ const theme = createTheme({
       defaultProps: {
         elevation: 0
       }
+    },
+    MuiPaper: {
+      defaultProps: {
+        elevation: 0
+      }
     }
   }
 });
@@ -46,7 +52,9 @@ ReactDOM.render(
     <BrowserRouter>
       <AuthProvider>
         <DialogProvider>
-          <App />
+          <SnackbarProvider>
+            <App />
+          </SnackbarProvider>
         </DialogProvider>
       </AuthProvider>
     </BrowserRouter>

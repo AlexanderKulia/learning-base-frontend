@@ -26,7 +26,6 @@ export const App: FunctionComponent = (): JSX.Element => {
             <PrivateRoute exact path="/" component={NoteList}></PrivateRoute>
             <PrivateRoute exact path="/notes/new" component={NoteCreate}></PrivateRoute>
             <PrivateRoute exact path="/notes/:id" component={NoteEdit}></PrivateRoute>
-            <PrivateRoute exact path="/notes/delete/:id" component={NoteDelete}></PrivateRoute>
           </Switch>
         </MainContainer>
       </AppContainer>

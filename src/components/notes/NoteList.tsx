@@ -1,18 +1,18 @@
 /* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
 /** @jsxImportSource @emotion/react */
 import React, { useEffect } from "react";
-import { Paper, Typography, Button, Link, useTheme } from "@mui/material";
+import { Paper, Typography, Button, Link, useTheme, Box, Grid } from "@mui/material";
 import { useState } from "react";
 import { css } from "@emotion/react";
 import { Link as RouterLink } from "react-router-dom";
 import { NotesApi } from "../../services/api/index";
-import { useDialog } from "../../contexts/ModalContext";
+import { Spinner } from "../utils/Spinner";
+import { NoteDelete } from "./NoteDelete";
 
 export const NoteList = () => {
   const theme = useTheme();
   const [notes, setNotes] = useState<{ id: number; title: string; content: string }[]>([]);
   const [loading, setLoading] = useState(true);
-  const { handleModal } = useDialog();
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -22,10 +22,6 @@ export const NoteList = () => {
     };
     fetchNotes();
   }, []);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   const renderCreateButton = () => {
     return (
@@ -41,15 +37,6 @@ export const NoteList = () => {
             New
           </Button>
         </Link>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            handleModal({ title: "title", content: "content", cancelButton: "cancel", acceptButton: "accept" });
-          }}
-        >
-          Dialog
-        </Button>
       </>
     );
   };
@@ -61,21 +48,29 @@ export const NoteList = () => {
         elevation={0}
         variant="outlined"
         css={css`
-          width: 30%;
+          display: flex;
+          flex-direction: column;
           padding: ${theme.spacing(1)};
           margin-bottom: ${theme.spacing(1)};
         `}
       >
         <Typography variant="h6">{note.title}</Typography>
         <Typography variant="body1">{note.content}</Typography>
+        <NoteDelete id={note.id} title={note.title} />
       </Paper>
     );
   });
 
   return (
-    <>
+    <Grid item md={4}>
       {renderCreateButton()}
-      {renderNotes}
-    </>
+      <Box
+        css={css`
+          position: relative;
+        `}
+      >
+        {loading ? <Spinner /> : renderNotes}
+      </Box>
+    </Grid>
   );
 };

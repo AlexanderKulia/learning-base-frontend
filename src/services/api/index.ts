@@ -16,7 +16,7 @@ interface CreateNoteDto {
 }
 
 export const NotesApi = {
-  index: () => get("/notes"),
+  index: () => get<{ id: number; title: string; content: string }[]>("/notes"),
   single: (id: number) => get(`/notes/${id}`),
   create: (dto: CreateNoteDto) => post("/notes", dto),
   update: (id: number, dto: Partial<CreateNoteDto>) => patch(`/notes/${id}`, dto),

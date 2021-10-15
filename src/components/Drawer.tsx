@@ -2,7 +2,7 @@
 /** @jsxImportSource @emotion/react */
 import React from "react";
 import { css } from "@emotion/react";
-import { Drawer as MuiDrawer, List, ListItem, ListItemText, Toolbar } from "@mui/material";
+import { Drawer as MuiDrawer, List, ListItem, ListItemText, Toolbar, Box } from "@mui/material";
 
 export const drawerWidth = 96;
 
@@ -20,7 +20,7 @@ export const Drawer = () => {
       `}
     >
       <Toolbar />
-      <div
+      <Box
         css={css`
           overflow: auto;
         `}
@@ -32,7 +32,7 @@ export const Drawer = () => {
             </ListItem>
           ))}
         </List>
-      </div>
+      </Box>
     </MuiDrawer>
   );
 };

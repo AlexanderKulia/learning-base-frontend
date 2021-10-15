@@ -1,25 +1,25 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 import {
-  Button,
   Dialog as MuiDialog,
+  Button,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle
 } from "@mui/material";
-import { useDialog } from "../../contexts/ModalContext";
+import { LoadingButton } from "@mui/lab";
+import { useDialog } from "../../contexts/DialogContext";
 
-interface DialogProps {
-  open: boolean;
+export interface DialogProps {
   title: string;
-  content: string;
-  cancelButton: string;
-  cancelButtonAction: () => void;
-  acceptButton: string;
-  acceptButtonAction: () => void;
+  content: JSX.Element;
+  acceptButton: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
-export const Dialog = (props: DialogProps) => {
+export const Dialog: FunctionComponent<{ isOpen: boolean; isLoading: boolean } & DialogProps> = (props) => {
   const { setIsOpen } = useDialog();
 
   const handleClose = () => {
@@ -28,34 +28,33 @@ export const Dialog = (props: DialogProps) => {
 
   return (
     <MuiDialog
-      open={props.open}
+      open={props.isOpen}
       onClose={handleClose}
-      aria-labelledby="alert-dialog-title"
-      aria-describedby="alert-dialog-description"
+      fullWidth={true}
+      aria-labelledby="dialog-title"
+      aria-describedby="dialog-description"
     >
-      <DialogTitle id="alert-dialog-title">{props.title}</DialogTitle>
+      <DialogTitle id="dialog-title">{props.title}</DialogTitle>
       <DialogContent>
-        <DialogContentText id="alert-dialog-description">{props.content}</DialogContentText>
+        <DialogContentText id="dialog-description">{props.content}</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button
           onClick={() => {
             setIsOpen(false);
-            props.cancelButtonAction();
           }}
           color="primary"
         >
-          {props.cancelButton}
+          Cancel
         </Button>
-        <Button
+        <LoadingButton
           onClick={() => {
-            setIsOpen(false);
-            props.acceptButtonAction();
+            props.acceptButton.onClick();
           }}
-          color="primary"
+          loading={props.isLoading}
         >
-          {props.acceptButton}
-        </Button>
+          {props.acceptButton.label}
+        </LoadingButton>
       </DialogActions>
     </MuiDialog>
   );
