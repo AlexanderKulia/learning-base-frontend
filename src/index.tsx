@@ -18,30 +18,81 @@ declare module "@mui/material/styles" {
 const theme = createTheme({
   palette: {
     primary: {
-      light: "#9a67ea",
-      main: "#673ab7",
-      dark: "#320b86"
+      light: "#7953d2",
+      main: "#4527a0",
+      dark: "#000070"
     },
     secondary: {
-      light: "#5e92f3",
-      main: "#1565c0",
-      dark: "#003c8f"
+      light: "#63a4ff",
+      main: "#1976d2",
+      dark: "#004ba0"
     }
   },
   components: {
     MuiButton: {
       defaultProps: {
-        disableElevation: true
+        disableElevation: true,
+        color: "primary",
+        variant: "contained"
+      },
+      styleOverrides: {
+        root: {
+          borderRadius: 0
+        }
       }
     },
     MuiAppBar: {
       defaultProps: {
-        elevation: 0
+        elevation: 0,
+        color: "primary"
       }
     },
     MuiPaper: {
       defaultProps: {
+        elevation: 0,
+        variant: "outlined"
+      },
+      styleOverrides: {
+        root: {
+          borderRadius: 0
+        }
+      }
+    },
+    MuiCard: {
+      defaultProps: {
         elevation: 0
+      },
+      styleOverrides: {
+        root: {
+          borderRadius: 0
+        }
+      }
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: 0
+        }
+      }
+    },
+    MuiCircularProgress: {
+      defaultProps: {
+        color: "primary"
+      }
+    },
+    MuiTextField: {
+      defaultProps: {
+        variant: "outlined"
+      }
+    },
+    MuiChip: {
+      defaultProps: {
+        variant: "outlined"
+      }
+    },
+    MuiLink: {
+      defaultProps: {
+        underline: "none"
       }
     }
   }

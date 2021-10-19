@@ -23,7 +23,6 @@ export const AppBar = () => {
   return (
     <MuiAppBar
       position="fixed"
-      color="primary"
       css={css`
         z-index: ${theme.zIndex.drawer + 1};
         flex-row: 1;
@@ -40,7 +39,7 @@ export const AppBar = () => {
           </Link>
         </Box>
         <Typography variant="h6">{JSON.stringify(currentUser)}</Typography>
-        <Button color="inherit" onClick={handleLogout}>
+        <Button variant="text" color="inherit" onClick={handleLogout}>
           Logout
         </Button>
       </Toolbar>

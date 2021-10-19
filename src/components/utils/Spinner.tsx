@@ -8,7 +8,6 @@ export const Spinner = (props: any) => {
   return (
     <CircularProgress
       css={css`
-        color: #000000;
         position: absolute;
         top: 50%;
         left: 50%;

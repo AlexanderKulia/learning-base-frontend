@@ -1,15 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import { DeleteOutline } from "@mui/icons-material";
-import { Typography } from "@mui/material";
 import { useDialog } from "../../contexts/DialogContext";
 import { useSnackbar } from "../../contexts/SnackbarContext";
+import { NotesApi } from "../../services/api";
 
 interface DeleteNoteProps {
   id: number;
   title: string;
+  handleDelete: (id: number) => void;
 }
 
-export const NoteDelete = ({ id, title }: DeleteNoteProps) => {
+export const NoteDelete = ({ id, title, handleDelete }: DeleteNoteProps) => {
   const { handleDialog, handleDialogClose } = useDialog();
   const { handleSnackbar } = useSnackbar();
 
@@ -27,8 +28,14 @@ export const NoteDelete = ({ id, title }: DeleteNoteProps) => {
           acceptButton: {
             label: "Delete",
             onClick: () => {
-              handleDialogClose(() => {
-                handleSnackbar(`Deleted note with id ${id}`);
+              handleDialogClose(async () => {
+                try {
+                  await NotesApi.remove(id);
+                  handleDelete(id);
+                  handleSnackbar(`Deleted note ${title}`);
+                } catch (e) {
+                  alert("Could not delete note");
+                }
               });
             }
           }

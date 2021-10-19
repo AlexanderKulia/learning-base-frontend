@@ -49,9 +49,7 @@ export const SignInPage = () => {
         `}
       >
         <Paper
-          variant="outlined"
           square
-          elevation={0}
           css={css`
             display: flex;
             flex-direction: column;
@@ -71,7 +69,6 @@ export const SignInPage = () => {
             <TextField
               value={formik.values.email}
               onChange={formik.handleChange}
-              variant="outlined"
               margin="normal"
               required
               fullWidth
@@ -84,7 +81,6 @@ export const SignInPage = () => {
             <TextField
               value={formik.values.password}
               onChange={formik.handleChange}
-              variant="outlined"
               margin="normal"
               required
               fullWidth
@@ -98,8 +94,6 @@ export const SignInPage = () => {
               disabled={formik.isSubmitting}
               type="submit"
               fullWidth
-              variant="contained"
-              color="primary"
               css={css`
                 margin: ${theme.spacing(3, 0, 2)};
               `}

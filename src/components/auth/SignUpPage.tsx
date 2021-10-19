@@ -79,9 +79,7 @@ export const SignUpPage = () => {
         `}
       >
         <Paper
-          variant="outlined"
           square
-          elevation={0}
           css={css`
             display: flex;
             flex-direction: column;
@@ -104,7 +102,6 @@ export const SignUpPage = () => {
               onBlur={formik.handleBlur}
               error={formik.touched.email && formik.errors.email ? true : false}
               helperText={formik.touched.email && formik.errors.email ? formik.errors.email : null}
-              variant="outlined"
               margin="normal"
               required
               fullWidth
@@ -120,7 +117,6 @@ export const SignUpPage = () => {
               onBlur={formik.handleBlur}
               error={formik.touched.password && formik.errors.password ? true : false}
               helperText={formik.touched.password && formik.errors.password ? formik.errors.password : null}
-              variant="outlined"
               margin="normal"
               required
               fullWidth
@@ -138,7 +134,6 @@ export const SignUpPage = () => {
               helperText={
                 formik.touched.confirmPassword && formik.errors.confirmPassword ? formik.errors.confirmPassword : null
               }
-              variant="outlined"
               margin="normal"
               required
               fullWidth
@@ -153,7 +148,6 @@ export const SignUpPage = () => {
               type="submit"
               fullWidth
               variant="contained"
-              color="primary"
               css={css`
                 margin: ${theme.spacing(3, 0, 2)};
               `}

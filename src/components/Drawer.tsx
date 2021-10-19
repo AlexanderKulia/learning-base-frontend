@@ -2,9 +2,19 @@
 /** @jsxImportSource @emotion/react */
 import React from "react";
 import { css } from "@emotion/react";
-import { Drawer as MuiDrawer, List, ListItem, ListItemText, Toolbar, Box } from "@mui/material";
+import { Drawer as MuiDrawer, List, ListItem, ListItemButton, Toolbar, Box, ListItemText } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
 export const drawerWidth = 96;
+
+interface DrawerItems {
+  [key: string]: string;
+}
+
+const drawerItems: DrawerItems = {
+  Notes: "/notes",
+  Tags: "/tags"
+};
 
 export const Drawer = () => {
   return (
@@ -26,9 +36,11 @@ export const Drawer = () => {
         `}
       >
         <List>
-          {["Tags"].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemText primary={text} />
+          {Object.keys(drawerItems).map((text: string) => (
+            <ListItem disablePadding button key={text}>
+              <ListItemButton component={RouterLink} to={drawerItems[text]}>
+                <ListItemText primary={text} />
+              </ListItemButton>
             </ListItem>
           ))}
         </List>

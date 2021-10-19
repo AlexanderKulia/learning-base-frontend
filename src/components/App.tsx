@@ -1,15 +1,15 @@
 import React, { FunctionComponent } from "react";
-import { Switch, useLocation } from "react-router-dom";
+import { Switch, useLocation, Redirect, Route } from "react-router-dom";
 import { AppBar } from "./AppBar";
 import { Drawer } from "./Drawer";
 import { NoteList } from "./notes/NoteList";
 import { NoteCreate } from "./notes/NoteCreate";
 import { NoteEdit } from "./notes/NoteEdit";
-import { NoteDelete } from "./notes/NoteDelete";
 import { MainContainer } from "./MainContainer";
 import { PrivateRoute } from "./PrivateRoute";
 import { LoginContainer } from "./auth/LoginContainer";
 import { AppContainer } from "./AppContainer";
+import { TagList } from "./tags/TagList";
 
 export const App: FunctionComponent = (): JSX.Element => {
   const { pathname } = useLocation();
@@ -23,9 +23,13 @@ export const App: FunctionComponent = (): JSX.Element => {
         {!excludeNavFrom.includes(pathname) && <Drawer />}
         <MainContainer>
           <Switch>
-            <PrivateRoute exact path="/" component={NoteList}></PrivateRoute>
-            <PrivateRoute exact path="/notes/new" component={NoteCreate}></PrivateRoute>
-            <PrivateRoute exact path="/notes/:id" component={NoteEdit}></PrivateRoute>
+            <Route exact path="/">
+              <Redirect to="/notes" />
+            </Route>
+            <PrivateRoute exact path="/notes" component={NoteList} />
+            <PrivateRoute exact path="/notes/new" component={NoteCreate} />
+            <PrivateRoute exact path="/notes/:id" component={NoteEdit} />
+            <PrivateRoute exact path="/tags" component={TagList} />
           </Switch>
         </MainContainer>
       </AppContainer>

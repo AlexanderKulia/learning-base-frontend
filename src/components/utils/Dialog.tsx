@@ -43,7 +43,6 @@ export const Dialog: FunctionComponent<{ isOpen: boolean; isLoading: boolean } &
           onClick={() => {
             setIsOpen(false);
           }}
-          color="primary"
         >
           Cancel
         </Button>
