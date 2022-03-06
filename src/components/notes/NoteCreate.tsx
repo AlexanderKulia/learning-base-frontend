@@ -1,12 +1,27 @@
-import React from "react";
 import { Grid, Typography } from "@mui/material";
-import { NoteForm } from "../forms/NoteForm";
+import React, { useState } from "react";
+import { Note } from "../../services/api";
+import { NoteForm, NoteFormValues } from "../forms/NoteForm";
+
+const defaultValues: NoteFormValues = {
+  id: 0,
+  title: "",
+  content: JSON.stringify({
+    type: "doc",
+    content: [],
+  }),
+  tags: [],
+};
 
 export const NoteCreate = () => {
+  const [note, setNote] = useState<Omit<Note, "tags"> & { tags: string[] }>(
+    defaultValues
+  );
+
   return (
-    <Grid item md={4}>
+    <Grid item md={6}>
       <Typography variant="h6">Create Note</Typography>
-      <NoteForm formValues={{ id: 0, title: "", content: "", tags: [] }} formType="create" />
+      <NoteForm formValues={note} formType="create" />
     </Grid>
   );
 };

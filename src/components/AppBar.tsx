@@ -1,5 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
-/** @jsxImportSource @emotion/react */
 import React from "react";
 import { AppBar as MuiAppBar, Toolbar, Typography, Button, Link, useTheme, Box } from "@mui/material";
 import { css } from "@emotion/react";

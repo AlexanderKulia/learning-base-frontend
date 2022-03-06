@@ -1,5 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
-/** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from "react";
 import {
   Grid,
@@ -12,25 +10,27 @@ import {
   Paper,
   Typography,
   TextField,
-  InputAdornment
+  InputAdornment,
+  TableSortLabel
 } from "@mui/material";
-import { EditOutlined, DeleteOutlined, SearchOutlined } from "@mui/icons-material";
+import { SearchOutlined } from "@mui/icons-material";
 import { css } from "@emotion/react";
-import { TagsApi } from "../../services/api";
+import { Tag, TagsApi } from "../../services/api";
 import { Spinner } from "../utils/Spinner";
 import { useTheme } from "@mui/system";
 import { TagEdit } from "./TagEdit";
 import { TagDelete } from "./TagDelete";
 
-export interface Tag {
-  id: number;
-  title: string;
-}
+type SortBy = "id" | "title" | "noteCount";
+
+type SortOrder = "asc" | "desc";
 
 export const TagList = () => {
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [sortBy, setSortBy] = useState<SortBy>("id");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const theme = useTheme();
 
   useEffect(() => {
@@ -64,10 +64,10 @@ export const TagList = () => {
       .filter((tag) => tag.title.includes(searchTerm))
       .map((tag) => {
         return (
-          <TableRow>
+          <TableRow key={tag.id}>
             <TableCell>{tag.id}</TableCell>
             <TableCell>{tag.title}</TableCell>
-            <TableCell>tbd</TableCell>
+            <TableCell>{tag.noteCount}</TableCell>
             <TableCell>
               <TagEdit tag={tag} setTags={setTags} />
               <TagDelete tag={tag} setTags={setTags} />
@@ -77,15 +77,72 @@ export const TagList = () => {
       });
   };
 
+  const handleSort = (column: SortBy) => {
+    let tSortOrder = sortOrder;
+
+    if (column === sortBy) {
+      tSortOrder = tSortOrder === "asc" ? "desc" : "asc";
+      setSortOrder(tSortOrder);
+    } else {
+      setSortBy(column);
+      tSortOrder = "asc";
+      setSortOrder(tSortOrder);
+    }
+
+    setTags(sortData(column, tSortOrder));
+  };
+
+  const sortData = (sortBy: SortBy, sortOrder: SortOrder) => {
+    console.log(`sorting by ${sortBy} order ${sortOrder}`);
+    switch (sortBy) {
+      default:
+        return tags.sort((a, b) => {
+          if (a[sortBy] < b[sortBy]) return sortOrder === "asc" ? -1 : 1;
+          if (a[sortBy] > b[sortBy]) return sortOrder === "asc" ? 1 : -1;
+          return 0;
+        });
+    }
+  };
+
   const renderTable = () => {
     return (
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Id</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Count</TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={sortBy === "id"}
+                  direction={sortOrder}
+                  onClick={() => {
+                    handleSort("id");
+                  }}
+                >
+                  Id
+                </TableSortLabel>
+              </TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={sortBy === "title"}
+                  direction={sortOrder}
+                  onClick={() => {
+                    handleSort("title");
+                  }}
+                >
+                  Title
+                </TableSortLabel>
+              </TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={sortBy === "noteCount"}
+                  direction={sortOrder}
+                  onClick={() => {
+                    handleSort("noteCount");
+                  }}
+                >
+                  Note count
+                </TableSortLabel>
+              </TableCell>
               <TableCell>Action</TableCell>
             </TableRow>
           </TableHead>

@@ -1,15 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { Grid, Typography } from "@mui/material";
-import { NoteForm } from "../forms/NoteForm";
+import { css } from "@emotion/react";
+import { Grid, Typography, useTheme } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Note, Tag } from "../../services/api";
-import { NotesApi } from "../../services/api";
+import { Note, NotesApi } from "../../services/api";
+import { NoteForm } from "../forms/NoteForm";
 import { Spinner } from "../utils/Spinner";
 
 export const NoteEdit = () => {
-  const [note, setNote] = useState<Note>({ id: 0, title: "", content: "", tags: [] });
+  const [note, setNote] = useState<Note>({
+    id: 0,
+    title: "",
+    content: "",
+    tags: [],
+  });
   const [loading, setLoading] = useState<boolean>(true);
   const { id } = useParams<{ id: string }>();
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchNote = async (id: number) => {
@@ -23,7 +29,13 @@ export const NoteEdit = () => {
   if (loading) return <Spinner />;
 
   return (
-    <Grid item md={4}>
+    <Grid
+      item
+      md={6}
+      css={css`
+        padding-right: ${theme.spacing(2)};
+      `}
+    >
       <Typography variant="h6">Edit Note</Typography>
       <NoteForm
         formValues={{
@@ -32,7 +44,7 @@ export const NoteEdit = () => {
           content: note.content,
           tags: note.tags.map((tag) => {
             return tag.title;
-          })
+          }),
         }}
         formType="edit"
       />

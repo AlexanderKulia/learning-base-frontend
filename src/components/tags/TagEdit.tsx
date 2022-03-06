@@ -1,5 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
-/** @jsxImportSource @emotion/react */
 import React, { FunctionComponent, useState } from "react";
 import { EditOutlined } from "@mui/icons-material";
 import { Dialog, DialogContent, DialogTitle, TextField, DialogActions, Button, useTheme } from "@mui/material";

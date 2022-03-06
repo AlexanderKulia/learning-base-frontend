@@ -1,5 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
-/** @jsxImportSource @emotion/react */
 import React, { ChangeEvent, useState } from "react";
 import { Paper, Typography, TextField, Grid, Button, Link, useTheme } from "@mui/material";
 import { Link as RouterLink, useHistory } from "react-router-dom";

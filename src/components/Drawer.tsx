@@ -1,5 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
-/** @jsxImportSource @emotion/react */
 import React from "react";
 import { css } from "@emotion/react";
 import { Drawer as MuiDrawer, List, ListItem, ListItemButton, Toolbar, Box, ListItemText } from "@mui/material";

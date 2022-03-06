@@ -1,14 +1,21 @@
-/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
-/** @jsxImportSource @emotion/react */
-import React, { FunctionComponent } from "react";
-import { TextField, Button, Grid, Chip, Autocomplete, useTheme, Link } from "@mui/material";
-import { Link as RouterLink, useHistory } from "react-router-dom";
 import { css } from "@emotion/react";
+import {
+  Autocomplete,
+  Button,
+  Chip,
+  Grid,
+  Link,
+  TextField,
+  useTheme,
+} from "@mui/material";
 import { useFormik } from "formik";
-import { NotesApi } from "../../services/api/index";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { Link as RouterLink, useHistory } from "react-router-dom";
 import { useSnackbar } from "../../contexts/SnackbarContext";
+import { NotesApi, Tag, TagsApi } from "../../services/api/index";
+import { RichText } from "./RichText/RichText";
 
-interface NoteFormValues {
+export interface NoteFormValues {
   id: number;
   title: string;
   content: string;
@@ -20,7 +27,15 @@ interface NoteFormProps {
   formType: "create" | "edit";
 }
 
-export const NoteForm: FunctionComponent<NoteFormProps> = ({ formValues, formType }) => {
+export const NoteForm: FunctionComponent<NoteFormProps> = ({
+  formValues,
+  formType,
+}) => {
+  const [suggestedTags, setSuggestedTags] = useState<Tag[]>([]);
+  const [debouncedSuggestedTags, setDebouncedSuggestedTags] = useState<Tag[]>(
+    []
+  );
+
   const history = useHistory();
   const { handleSnackbar } = useSnackbar();
   const formik = useFormik({
@@ -41,9 +56,31 @@ export const NoteForm: FunctionComponent<NoteFormProps> = ({ formValues, formTyp
       } catch (error) {
         handleSnackbar("Failed to submit the note");
       }
-    }
+    },
   });
   const theme = useTheme();
+  useEffect(() => {
+    const fetchSuggestedTags = async () => {
+      try {
+        const res = await TagsApi.index({
+          params: {
+            search: formik.values._tag,
+          },
+        });
+        setSuggestedTags(res.data);
+      } catch (e) {
+        alert("Could not fetch suggested tags");
+      }
+    };
+
+    const timerId = setTimeout(() => {
+      fetchSuggestedTags();
+    }, 500);
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [formik.values._tag]);
 
   return (
     <form
@@ -66,26 +103,19 @@ export const NoteForm: FunctionComponent<NoteFormProps> = ({ formValues, formTyp
         id="title"
         name="title"
       />
-      <TextField
-        value={formik.values.content}
-        onChange={formik.handleChange}
-        margin="normal"
-        required
-        fullWidth
-        multiline
-        rows={10}
-        label="Content"
-        type="text"
-        id="content"
-        name="content"
+      <RichText
+        content={formik.values.content}
+        onChange={(content) => {
+          formik.setFieldValue("content", content);
+        }}
       />
       <Autocomplete
         multiple
         size="small"
         id="_tag"
-        options={[{ title: "tag1" }, { title: "tag2" }].map((option) => option.title)}
+        //TODO rework autocomplete
+        options={suggestedTags.map((option) => option.title)}
         freeSolo
-        open={false}
         value={formik.values.tags}
         onChange={(e, value) => {
           formik.setFieldValue("tags", value);
@@ -96,16 +126,17 @@ export const NoteForm: FunctionComponent<NoteFormProps> = ({ formValues, formTyp
         }}
         renderTags={(value: string[], getTagProps) =>
           value.map((option: string, index: number) => (
-            <Chip
-              label={option}
-              css={css`
-                border-radius: 0px;
-              `}
-              {...getTagProps({ index })}
-            />
+            <Chip label={option} {...getTagProps({ index })} />
           ))
         }
-        renderInput={(params) => <TextField margin="normal" {...params} label="Tags" placeholder="Add tag" />}
+        renderInput={(params) => (
+          <TextField
+            margin="normal"
+            {...params}
+            label="Tags"
+            placeholder="Add tag"
+          />
+        )}
       />
       <Grid container justifyContent="flex-end">
         <Grid item>
