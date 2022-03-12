@@ -1,29 +1,33 @@
-import React, { useState, useEffect } from "react";
+import { css } from "@emotion/react";
+import { SearchOutlined } from "@mui/icons-material";
 import {
   Grid,
-  Table,
-  TableContainer,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableBody,
-  Paper,
-  Typography,
-  TextField,
   InputAdornment,
-  TableSortLabel
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableFooter,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { SearchOutlined } from "@mui/icons-material";
-import { css } from "@emotion/react";
+import { useTheme } from "@mui/system";
+import React, { useEffect, useState } from "react";
 import { Tag, TagsApi } from "../../services/api";
 import { Spinner } from "../utils/Spinner";
-import { useTheme } from "@mui/system";
-import { TagEdit } from "./TagEdit";
 import { TagDelete } from "./TagDelete";
+import { TagEdit } from "./TagEdit";
 
 type SortBy = "id" | "title" | "noteCount";
 
 type SortOrder = "asc" | "desc";
+
+export const ROWS_PER_PAGE = 10;
 
 export const TagList = () => {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -31,22 +35,34 @@ export const TagList = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortBy>("id");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [page, setPage] = useState<number>(1);
+  const [itemCount, setItemCount] = useState<number>(1);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(ROWS_PER_PAGE);
   const theme = useTheme();
 
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const res = await TagsApi.index();
-        setTags(res.data);
+        const res = await TagsApi.index({
+          params: {
+            page,
+            perPage: rowsPerPage,
+          },
+        });
+        setTags(res.data.data);
+        setItemCount(res.data.meta.itemCount);
+
         setIsLoading(false);
       } catch (e) {
         alert("Could not fetch tags");
       }
     };
     fetchTags();
-  }, []);
+  }, [page, rowsPerPage]);
 
-  const handeSearchTermChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handeSearchTermChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setSearchTerm(event.target.value);
   };
 
@@ -147,6 +163,22 @@ export const TagList = () => {
             </TableRow>
           </TableHead>
           <TableBody>{renderTableRows()}</TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                colSpan={3}
+                count={itemCount}
+                rowsPerPage={rowsPerPage}
+                page={page - 1}
+                onPageChange={(_event, value) => {
+                  setPage(value + 1);
+                }}
+                onRowsPerPageChange={(event) => {
+                  setRowsPerPage(parseInt(event.target.value));
+                }}
+              />
+            </TableRow>
+          </TableFooter>
         </Table>
       </TableContainer>
     );
@@ -180,7 +212,7 @@ export const TagList = () => {
                 <InputAdornment position="start">
                   <SearchOutlined />
                 </InputAdornment>
-              )
+              ),
             }}
             size="small"
             value={searchTerm}

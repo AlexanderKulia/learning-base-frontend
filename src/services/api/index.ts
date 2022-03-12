@@ -37,8 +37,17 @@ export interface Tag {
   noteCount: number;
 }
 
+export interface ApiResponse<T> {
+  data: T[];
+  meta: {
+    itemCount: number;
+    pageCount: number;
+  };
+}
+
 export const NotesApi = {
-  index: (config?: AxiosRequestConfig) => get<Note[]>("/notes", config),
+  index: (config?: AxiosRequestConfig) =>
+    get<ApiResponse<Note>>("/notes", config),
   single: (id: number) => get<Note>(`/notes/${id}`),
   create: (dto: CreateNoteDto) => post("/notes", dto),
   update: (id: number, dto: Partial<CreateNoteDto>) =>
@@ -47,7 +56,8 @@ export const NotesApi = {
 };
 
 export const TagsApi = {
-  index: (config?: AxiosRequestConfig) => get<Tag[]>("/tags", config),
+  index: (config?: AxiosRequestConfig) =>
+    get<ApiResponse<Tag>>("/tags", config),
   single: (id: number) => get<Tag>(`/tags/${id}`),
   create: (dto: CreateTagDto) => post("/tags", dto),
   update: (id: number, dto: Partial<CreateTagDto>) => patch(`/tags/${id}`, dto),

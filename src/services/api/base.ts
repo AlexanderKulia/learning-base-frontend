@@ -3,7 +3,7 @@ import axios from "axios";
 export const apiClient = axios.create({
   baseURL: process.env.REACT_APP_BACKEND_URL,
   responseType: "json",
-  withCredentials: true
+  withCredentials: true,
 });
 
 apiClient.interceptors.response.use(

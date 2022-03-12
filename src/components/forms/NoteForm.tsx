@@ -67,7 +67,7 @@ export const NoteForm: FunctionComponent<NoteFormProps> = ({
             search: formik.values._tag,
           },
         });
-        setSuggestedTags(res.data);
+        setSuggestedTags(res.data.data);
       } catch (e) {
         alert("Could not fetch suggested tags");
       }

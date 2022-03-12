@@ -1,38 +1,60 @@
 import { css } from "@emotion/react";
+import { CheckBox, CheckBoxOutlineBlank } from "@mui/icons-material";
 import {
+  Autocomplete,
   Box,
   Button,
   Card,
   CardActionArea,
   CardContent,
   CardHeader,
+  Checkbox,
   Chip,
   Grid,
   Grow,
   IconButton,
   Link,
+  Pagination,
+  TextField,
   Typography,
   useTheme,
 } from "@mui/material";
-import { Editor, EditorContent, useEditor } from "@tiptap/react";
+import { Editor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import React, { useEffect, useState } from "react";
 import { Link as RouterLink, useHistory } from "react-router-dom";
-import { Note, NotesApi, Tag } from "../../services/api/index";
+import { Note, NotesApi, Tag, TagsApi } from "../../services/api/index";
 import { Spinner } from "../utils/Spinner";
 import { NoteDelete } from "./NoteDelete";
 
+export const PER_PAGE = 10;
+
 export const NoteList = () => {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+  const [tagsFilter, setTagsFilter] = useState<string[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [pageCount, setPageCount] = useState<number>(1);
   const theme = useTheme();
   const history = useHistory();
 
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const res = await NotesApi.index();
-        setNotes(res.data);
+        const notesRes = await NotesApi.index({
+          params: {
+            search: debouncedSearchTerm,
+            tags: tagsFilter,
+            page,
+            perPage: PER_PAGE,
+          },
+        });
+        setNotes(notesRes.data.data);
+        setPageCount(notesRes.data.meta.pageCount);
+
         setIsLoading(false);
       } catch (e) {
         alert("Could not fetch notes");
@@ -40,10 +62,74 @@ export const NoteList = () => {
     };
 
     fetchNotes();
+  }, [debouncedSearchTerm, tagsFilter, page]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const tagsRes = await TagsApi.index({
+          params: { page: 1, perPage: 10 },
+        });
+        setTags(tagsRes.data.data);
+      } catch (e) {
+        alert("Could not fetch tags");
+      }
+    };
+
+    fetchTags();
   }, []);
+
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [searchTerm]);
 
   const handleDelete = (id: number) => {
     setNotes(notes.filter((note) => note.id !== id));
+  };
+
+  const renderFilters = () => {
+    return (
+      <>
+        <Autocomplete
+          id="tags-filter"
+          multiple
+          disableCloseOnSelect
+          size="small"
+          options={tags.map((tag) => tag.title)}
+          renderInput={(params) => (
+            <TextField
+              margin="normal"
+              {...params}
+              label="Tags"
+              placeholder="Select tags"
+            />
+          )}
+          renderOption={(props, option, { selected }) => (
+            <li {...props}>
+              <Checkbox
+                icon={<CheckBoxOutlineBlank fontSize="small" />}
+                checkedIcon={<CheckBox fontSize="small" />}
+                checked={selected}
+                css={css`
+                  margin-right: 8px;
+                `}
+              />
+              {option}
+            </li>
+          )}
+          value={tagsFilter}
+          onChange={(e, newTagsFilter) => {
+            setTagsFilter(newTagsFilter);
+          }}
+        />
+      </>
+    );
   };
 
   const renderCreateButton = () => {
@@ -159,6 +245,23 @@ export const NoteList = () => {
           My Notes
         </Typography>
         {renderCreateButton()}
+        {renderFilters()}
+        <TextField
+          id="notes-search"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+          }}
+          label="Search notes by content"
+          variant="standard"
+        />
+        <Pagination
+          count={pageCount}
+          page={page}
+          onChange={(_event, value) => {
+            setPage(value);
+          }}
+        />
       </Grid>
       {isLoading ? (
         <Spinner />
