@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/system";
 import React, { useEffect, useState } from "react";
+import useDebounce from "../../hooks/useDebounce";
 import { Tag, TagsApi } from "../../services/api";
 import { Spinner } from "../utils/Spinner";
 import { TagDelete } from "./TagDelete";
@@ -33,6 +34,7 @@ export const TagList = () => {
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const debouncedSearchTerm = useDebounce<string>(searchTerm, 500);
   const [sortBy, setSortBy] = useState<SortBy>("id");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [page, setPage] = useState<number>(1);
@@ -45,6 +47,9 @@ export const TagList = () => {
       try {
         const res = await TagsApi.index({
           params: {
+            search: debouncedSearchTerm,
+            sortBy,
+            sortOrder,
             page,
             perPage: rowsPerPage,
           },
@@ -58,7 +63,7 @@ export const TagList = () => {
       }
     };
     fetchTags();
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, debouncedSearchTerm, sortBy, sortOrder]);
 
   const handeSearchTermChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -76,21 +81,19 @@ export const TagList = () => {
         </TableRow>
       );
 
-    return tags
-      .filter((tag) => tag.title.includes(searchTerm))
-      .map((tag) => {
-        return (
-          <TableRow key={tag.id}>
-            <TableCell>{tag.id}</TableCell>
-            <TableCell>{tag.title}</TableCell>
-            <TableCell>{tag.noteCount}</TableCell>
-            <TableCell>
-              <TagEdit tag={tag} setTags={setTags} />
-              <TagDelete tag={tag} setTags={setTags} />
-            </TableCell>
-          </TableRow>
-        );
-      });
+    return tags.map((tag) => {
+      return (
+        <TableRow key={tag.id}>
+          <TableCell>{tag.id}</TableCell>
+          <TableCell>{tag.title}</TableCell>
+          <TableCell>{tag._count.notes}</TableCell>
+          <TableCell>
+            <TagEdit tag={tag} setTags={setTags} />
+            <TagDelete tag={tag} setTags={setTags} />
+          </TableCell>
+        </TableRow>
+      );
+    });
   };
 
   const handleSort = (column: SortBy) => {
@@ -103,20 +106,6 @@ export const TagList = () => {
       setSortBy(column);
       tSortOrder = "asc";
       setSortOrder(tSortOrder);
-    }
-
-    setTags(sortData(column, tSortOrder));
-  };
-
-  const sortData = (sortBy: SortBy, sortOrder: SortOrder) => {
-    console.log(`sorting by ${sortBy} order ${sortOrder}`);
-    switch (sortBy) {
-      default:
-        return tags.sort((a, b) => {
-          if (a[sortBy] < b[sortBy]) return sortOrder === "asc" ? -1 : 1;
-          if (a[sortBy] > b[sortBy]) return sortOrder === "asc" ? 1 : -1;
-          return 0;
-        });
     }
   };
 

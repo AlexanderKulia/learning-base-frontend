@@ -34,7 +34,11 @@ export interface Note {
 export interface Tag {
   id: number;
   title: string;
-  noteCount: number;
+  createdAt?: string;
+  updatedAt?: string;
+  _count: {
+    notes: number;
+  };
 }
 
 export interface ApiResponse<T> {
