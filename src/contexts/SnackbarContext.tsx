@@ -1,11 +1,13 @@
-import { createContext, useState, useContext, FunctionComponent } from "react";
 import { Snackbar } from "@mui/material";
+import { createContext, FunctionComponent, useContext, useState } from "react";
 
 interface SnackbarContextValue {
   handleSnackbar: (message: string) => void;
 }
 
-const SnackbarContext = createContext<SnackbarContextValue | undefined>(undefined);
+const SnackbarContext = createContext<SnackbarContextValue | undefined>(
+  undefined
+);
 
 export interface SnackbarState {
   isOpen: boolean;
@@ -24,7 +26,7 @@ export const useSnackbar = () => {
 export const SnackbarProvider: FunctionComponent = ({ children }) => {
   const [state, setState] = useState<SnackbarState>({
     isOpen: false,
-    message: ""
+    message: "",
   });
   const { isOpen, message } = state;
 
@@ -32,7 +34,10 @@ export const SnackbarProvider: FunctionComponent = ({ children }) => {
     setState({ ...state, message, isOpen: true });
   };
 
-  const handleSnackbarClose = (event: React.SyntheticEvent | React.MouseEvent, reason?: string) => {
+  const handleSnackbarClose = (
+    event: Event | React.SyntheticEvent<any, Event>,
+    reason?: string
+  ) => {
     // prevents snackbar from closing on clickaway (anywhere in the app)
     if (reason === "clickaway") {
       return;
