@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_HOST: ${{ secrets.SSH_HOST }}
       DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
@@ -20,7 +20,7 @@ jobs:
         run: npm ci
       - run: npm run build --if-present
       - run: mkdir ~/.ssh
-      - run: 'echo "$SSH_KEY" >> ~/.ssh/github-action'
+      - run: 'echo "$SSH_PRIVATE_KEY" >> ~/.ssh/github-action'
       - run: chmod 400 ~/.ssh/github-action
       - run: echo -e 'Host static\n\tUser "$SSH_USER"\n\tHostName "$SSH_HOST"\n\tIdentityFile ~/.ssh/github-action\n\tStrictHostKeyChecking No' >> ~/.ssh/config
       - run: rsync -r build $SSH_USER@$SSH_HOST:$DEPLOY_PATH
