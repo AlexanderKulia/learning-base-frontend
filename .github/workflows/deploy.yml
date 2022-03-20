@@ -21,4 +21,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail
-      - run: ssh ${{ secrets.USERNAME }}@${{ secrets.HOST }}
+      - run: ssh root@$138.68.102.40
