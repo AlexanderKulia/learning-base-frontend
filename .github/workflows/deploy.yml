@@ -23,4 +23,4 @@ jobs:
           config: ${{ secrets.SSH_CONFIG }}
           known_hosts: unnecessary
           if_key_exists: fail
-      - run: ssh -o "" root@138.68.102.40
+      - run: ssh -o "IdentityFile=home/runner/id_ed25519" root@138.68.102.40
