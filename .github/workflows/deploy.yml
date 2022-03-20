@@ -22,5 +22,5 @@ jobs:
       - run: mkdir ~/.ssh
       - run: 'echo "$SSH_KEY" >> ~/.ssh/github-action'
       - run: chmod 400 ~/.ssh/github-action
-      - run: echo -e "Host static\n\tUser $SSH_USER\n\tHostname $ssh_host\n\tIdentityFile ~/.ssh/github-action\n\tStrictHostKeyChecking No" >> ~/.ssh/config
+      - run: echo -e "Host static\n\tUser $SSH_USER\n\tHostName $SSH_HOST\n\tIdentityFile ~/.ssh/github-action\n\tStrictHostKeyChecking No" >> ~/.ssh/config
       - run: rsync -r build $SSH_USER@$SSH_HOST:$DEPLOY_PATH
