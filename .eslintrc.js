@@ -11,7 +11,7 @@ module.exports = {
     "plugin:react/recommended",
     "plugin:react/jsx-runtime",
   ],
-  ignorePatterns: [".eslintrc.js"],
+  ignorePatterns: [".eslintrc.js", "craco.config.js"],
   rules: {
     "no-undef": "off",
     "no-unused-vars": "off",
