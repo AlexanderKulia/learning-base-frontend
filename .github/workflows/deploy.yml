@@ -9,7 +9,6 @@ jobs:
     env:
       REACT_APP_BACKEND_URL: https://learningbase-api.kaaprojects.com
       REACT_APP_FRONTEND_URL: https://learningbase.kaaprojects.com
-      DISABLE_ESLINT_PLUGIN: true
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2

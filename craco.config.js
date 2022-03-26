@@ -8,4 +8,7 @@ module.exports = {
     ],
     plugins: ["@emotion/babel-plugin"],
   },
+  eslint: {
+    enable: false,
+  },
 };
