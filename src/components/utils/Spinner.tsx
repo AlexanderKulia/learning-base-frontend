@@ -1,8 +1,7 @@
-import React from "react";
-import { CircularProgress } from "@mui/material";
 import { css } from "@emotion/react";
+import { CircularProgress } from "@mui/material";
 
-export const Spinner = (props: any) => {
+export const Spinner = (props: any): JSX.Element => {
   return (
     <CircularProgress
       css={css`

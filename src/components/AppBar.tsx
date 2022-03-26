@@ -1,15 +1,24 @@
-import React from "react";
-import { AppBar as MuiAppBar, Toolbar, Typography, Button, Link, useTheme, Box } from "@mui/material";
 import { css } from "@emotion/react";
-import { useHistory, Link as RouterLink } from "react-router-dom";
+import {
+  Alert,
+  AlertTitle,
+  AppBar as MuiAppBar,
+  Box,
+  Button,
+  Link,
+  Toolbar,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import { Link as RouterLink, useHistory } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-export const AppBar = () => {
+export const AppBar = (): JSX.Element => {
   const theme = useTheme();
   const { currentUser, logout } = useAuth();
   const history = useHistory();
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     try {
       logout();
       history.push("/signin");
@@ -18,29 +27,67 @@ export const AppBar = () => {
     }
   };
 
-  return (
-    <MuiAppBar
-      position="fixed"
-      css={css`
-        z-index: ${theme.zIndex.drawer + 1};
-        flex-row: 1;
-      `}
-    >
-      <Toolbar>
-        <Box
+  const handleEmailVerification = (): JSX.Element | null => {
+    if (currentUser && !currentUser.emailVerified)
+      return (
+        <Alert
+          severity="info"
           css={css`
-            flex-grow: 1;
+            position: fixed;
+            left: 50%;
+            transform: translate(-50%);
+            z-index: ${theme.zIndex.drawer + 2};
           `}
         >
-          <Link color="inherit" variant="h6" underline="none" component={RouterLink} to="/">
-            Learning Base
-          </Link>
-        </Box>
-        <Typography variant="h6">{JSON.stringify(currentUser)}</Typography>
-        <Button variant="text" color="inherit" onClick={handleLogout}>
-          Logout
-        </Button>
-      </Toolbar>
-    </MuiAppBar>
+          <AlertTitle>
+            Verification link has been sent to your email address
+          </AlertTitle>
+          Please click on the link from the email or{" "}
+          <a
+            href={`${process.env.REACT_APP_FRONTEND_URL}/send_verification`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            click here
+          </a>{" "}
+          if you did not receive the email
+        </Alert>
+      );
+    return null;
+  };
+
+  return (
+    <>
+      {handleEmailVerification()}
+      <MuiAppBar
+        position="fixed"
+        css={css`
+          z-index: ${theme.zIndex.drawer + 1};
+          flex-row: 1;
+        `}
+      >
+        <Toolbar>
+          <Box
+            css={css`
+              flex-grow: 1;
+            `}
+          >
+            <Link
+              color="inherit"
+              variant="h6"
+              underline="none"
+              component={RouterLink}
+              to="/"
+            >
+              Learning Base
+            </Link>
+          </Box>
+          <Typography variant="h6">{JSON.stringify(currentUser)}</Typography>
+          <Button variant="text" color="inherit" onClick={handleLogout}>
+            Logout
+          </Button>
+        </Toolbar>
+      </MuiAppBar>
+    </>
   );
 };

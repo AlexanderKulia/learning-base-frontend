@@ -1,5 +1,5 @@
 import { Grid, Typography } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Note } from "../../services/api";
 import { NoteForm, NoteFormValues } from "../forms/NoteForm";
 
@@ -13,9 +13,9 @@ const defaultValues: NoteFormValues = {
   tags: [],
 };
 
-export const NoteCreate = () => {
-  const [note, setNote] = useState<Omit<Note, "tags"> & { tags: string[] }>(
-    defaultValues
+export const NoteCreate = (): JSX.Element => {
+  const [note] = useState<Omit<Note, "tags"> & { tags: string[] }>(
+    defaultValues,
   );
 
   return (

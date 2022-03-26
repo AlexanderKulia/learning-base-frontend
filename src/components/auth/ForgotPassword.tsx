@@ -2,35 +2,36 @@ import { css } from "@emotion/react";
 import {
   Button,
   Grid,
-  Link,
   Paper,
   TextField,
   Typography,
   useTheme,
 } from "@mui/material";
 import { useFormik } from "formik";
-import { Link as RouterLink } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
+import { useHistory } from "react-router-dom";
+import { useSnackbar } from "../../contexts/SnackbarContext";
+import { AuthApi } from "../../services/api";
 
 interface FormValues {
   email: string;
-  password: string;
 }
 
-export const SignInPage = (): JSX.Element => {
+export const ForgotPassword = (): JSX.Element => {
   const theme = useTheme();
-  const { signIn } = useAuth();
+  const history = useHistory();
+  const { handleSnackbar } = useSnackbar();
   const initialValues: FormValues = {
     email: "",
-    password: "",
   };
   const formik = useFormik({
     initialValues,
     onSubmit: async (values) => {
       try {
-        await signIn(values.email, values.password);
+        const res = await AuthApi.forgotPassword(values.email);
+        handleSnackbar(res.data.message);
+        history.push("/signin");
       } catch (error) {
-        alert("Failed to sign in");
+        alert("Failed to send password reset");
       }
     },
   });
@@ -61,7 +62,7 @@ export const SignInPage = (): JSX.Element => {
             padding: ${theme.spacing(4)};
           `}
         >
-          <Typography variant="h5">Sign in</Typography>
+          <Typography variant="h5">Send password reset</Typography>
           <form
             css={css`
               width: 100%;
@@ -82,18 +83,6 @@ export const SignInPage = (): JSX.Element => {
               name="email"
               autoComplete="email"
             />
-            <TextField
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              margin="normal"
-              required
-              fullWidth
-              label="Password"
-              type="password"
-              id="password"
-              name="password"
-              autoComplete="current-password"
-            />
             <Button
               disabled={formik.isSubmitting}
               type="submit"
@@ -102,24 +91,8 @@ export const SignInPage = (): JSX.Element => {
                 margin: ${theme.spacing(3, 0, 2)};
               `}
             >
-              Sign In
+              Reset
             </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link
-                  component={RouterLink}
-                  to="/forgot_password"
-                  variant="body2"
-                >
-                  Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link component={RouterLink} to="/signup" variant="body2">
-                  Do not have an account? Sign Up
-                </Link>
-              </Grid>
-            </Grid>
           </form>
         </Paper>
       </Grid>

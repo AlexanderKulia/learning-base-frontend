@@ -1,12 +1,12 @@
 import { css } from "@emotion/react";
 import { Grid, Typography, useTheme } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Note, NotesApi } from "../../services/api";
 import { NoteForm } from "../forms/NoteForm";
 import { Spinner } from "../utils/Spinner";
 
-export const NoteEdit = () => {
+export const NoteEdit = (): JSX.Element => {
   const [note, setNote] = useState<Note>({
     id: 0,
     title: "",
@@ -18,7 +18,7 @@ export const NoteEdit = () => {
   const theme = useTheme();
 
   useEffect(() => {
-    const fetchNote = async (id: number) => {
+    const fetchNote = async (id: number): Promise<void> => {
       const res = await NotesApi.single(id);
       setNote(res.data);
       setLoading(false);

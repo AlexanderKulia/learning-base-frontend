@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 import { Editor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link as RouterLink, useHistory } from "react-router-dom";
 import { Note, NotesApi, Tag, TagsApi } from "../../services/api/index";
 import { Spinner } from "../utils/Spinner";
@@ -29,7 +29,7 @@ import { NoteDelete } from "./NoteDelete";
 
 export const PER_PAGE = 10;
 
-export const NoteList = () => {
+export const NoteList = (): JSX.Element => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -42,7 +42,7 @@ export const NoteList = () => {
   const history = useHistory();
 
   useEffect(() => {
-    const fetchNotes = async () => {
+    const fetchNotes = async (): Promise<void> => {
       try {
         const notesRes = await NotesApi.index({
           params: {
@@ -65,7 +65,7 @@ export const NoteList = () => {
   }, [debouncedSearchTerm, tagsFilter, page]);
 
   useEffect(() => {
-    const fetchTags = async () => {
+    const fetchTags = async (): Promise<void> => {
       try {
         const tagsRes = await TagsApi.index({
           params: { page: 1, perPage: 10 },
@@ -84,16 +84,16 @@ export const NoteList = () => {
       setDebouncedSearchTerm(searchTerm);
     }, 500);
 
-    return () => {
+    return (): void => {
       clearTimeout(timerId);
     };
   }, [searchTerm]);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: number): void => {
     setNotes(notes.filter((note) => note.id !== id));
   };
 
-  const renderFilters = () => {
+  const renderFilters = (): JSX.Element => {
     return (
       <>
         <Autocomplete
@@ -102,7 +102,7 @@ export const NoteList = () => {
           disableCloseOnSelect
           size="small"
           options={tags.map((tag) => tag.title)}
-          renderInput={(params) => (
+          renderInput={(params): JSX.Element => (
             <TextField
               margin="normal"
               {...params}
@@ -110,7 +110,7 @@ export const NoteList = () => {
               placeholder="Select tags"
             />
           )}
-          renderOption={(props, option, { selected }) => (
+          renderOption={(props, option, { selected }): JSX.Element => (
             <li {...props}>
               <Checkbox
                 icon={<CheckBoxOutlineBlank fontSize="small" />}
@@ -124,7 +124,7 @@ export const NoteList = () => {
             </li>
           )}
           value={tagsFilter}
-          onChange={(e, newTagsFilter) => {
+          onChange={(e, newTagsFilter): void => {
             setTagsFilter(newTagsFilter);
           }}
         />
@@ -132,7 +132,7 @@ export const NoteList = () => {
     );
   };
 
-  const renderCreateButton = () => {
+  const renderCreateButton = (): JSX.Element => {
     return (
       <>
         <Link underline="none" component={RouterLink} to="/notes/new">
@@ -149,7 +149,7 @@ export const NoteList = () => {
     );
   };
 
-  const renderTags = (tags: Tag[]) => {
+  const renderTags = (tags: Tag[]): JSX.Element[] => {
     return tags.map(({ id, title }) => (
       <Chip
         key={id}
@@ -196,7 +196,7 @@ export const NoteList = () => {
                 }
               />
               <CardActionArea
-                onClick={() => {
+                onClick={(): void => {
                   history.push(`notes/${id}`);
                 }}
               >
@@ -230,7 +230,7 @@ export const NoteList = () => {
           </Grow>
         </Grid>
       );
-    }
+    },
   );
 
   return (
@@ -249,7 +249,7 @@ export const NoteList = () => {
         <TextField
           id="notes-search"
           value={searchTerm}
-          onChange={(e) => {
+          onChange={(e): void => {
             setSearchTerm(e.target.value);
           }}
           label="Search notes by content"
@@ -258,7 +258,7 @@ export const NoteList = () => {
         <Pagination
           count={pageCount}
           page={page}
-          onChange={(_event, value) => {
+          onChange={(_event, value): void => {
             setPage(value);
           }}
         />

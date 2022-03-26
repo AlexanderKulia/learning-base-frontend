@@ -1,7 +1,6 @@
 import { CssBaseline } from "@mui/material";
 import { createTheme, Theme, ThemeProvider } from "@mui/material/styles";
 import dotenv from "dotenv";
-import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import { App } from "./components/App";
@@ -116,5 +115,5 @@ ReactDOM.render(
       </AuthProvider>
     </BrowserRouter>
   </ThemeProvider>,
-  document.getElementById("root")
+  document.getElementById("root"),
 );

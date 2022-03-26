@@ -1,13 +1,30 @@
 import { AxiosResponse } from "axios";
-import React, { createContext, useContext, FunctionComponent, useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
 import jwt_decode from "jwt-decode";
-import { AuthApi } from "../services/api";
+import {
+  createContext,
+  FunctionComponent,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { useHistory } from "react-router-dom";
+import { AuthApi, GenericResponse } from "../services/api";
 import { apiClient } from "../services/api/base";
 
-const AuthContext = createContext({} as any);
+interface ContextValue {
+  currentUser: AccessTokenPayload | null;
+  accessToken: string | null;
+  signUp: (
+    email: string,
+    password: string,
+  ) => Promise<AxiosResponse<GenericResponse>>;
+  signIn: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+}
 
-export const useAuth = () => {
+const AuthContext = createContext<ContextValue>({} as ContextValue);
+
+export const useAuth = (): ContextValue => {
   return useContext(AuthContext);
 };
 
@@ -16,6 +33,7 @@ export interface AccessTokenPayload {
   email: string;
   iat: number;
   exp: number;
+  emailVerified: boolean;
 }
 
 export interface RefreshTokenPayload {
@@ -26,12 +44,17 @@ export interface RefreshTokenPayload {
 }
 
 export const AuthProvider: FunctionComponent = ({ children }): JSX.Element => {
-  const [currentUser, setCurrentUser] = useState<AccessTokenPayload | null>(null);
+  const [currentUser, setCurrentUser] = useState<AccessTokenPayload | null>(
+    null,
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const history = useHistory();
 
-  const signUp = async (email: string, password: string): Promise<AxiosResponse<{ message: string }>> => {
+  const signUp = async (
+    email: string,
+    password: string,
+  ): Promise<AxiosResponse<{ message: string }>> => {
     return await AuthApi.signUp(email, password);
   };
 
@@ -40,7 +63,9 @@ export const AuthProvider: FunctionComponent = ({ children }): JSX.Element => {
     const accessToken = res.data.accessToken;
     setAccessToken(accessToken);
     setCurrentUser(jwt_decode<AccessTokenPayload>(accessToken));
-    apiClient.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+    apiClient.defaults.headers.common[
+      "Authorization"
+    ] = `Bearer ${accessToken}`;
     history.push("/");
   };
 
@@ -53,14 +78,16 @@ export const AuthProvider: FunctionComponent = ({ children }): JSX.Element => {
   };
 
   useEffect(() => {
-    const refreshToken = async () => {
+    const refreshToken = async (): Promise<void> => {
       const refreshTokenExists = (await AuthApi.verifyCurrentUser()).data;
 
       if (refreshTokenExists) {
         try {
           const res = await AuthApi.refreshToken();
           const newAccessToken = res.data.accessToken;
-          apiClient.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
+          apiClient.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${newAccessToken}`;
 
           setTimeout(async () => {
             await refreshToken();
@@ -79,7 +106,7 @@ export const AuthProvider: FunctionComponent = ({ children }): JSX.Element => {
   }, []);
 
   useEffect(() => {
-    const syncLogout = (event: StorageEvent) => {
+    const syncLogout = (event: StorageEvent): void => {
       if (event.key === "logout") {
         console.log("Logged out from storage");
         history.push("/signin");
@@ -88,18 +115,22 @@ export const AuthProvider: FunctionComponent = ({ children }): JSX.Element => {
 
     window.addEventListener("storage", syncLogout);
 
-    return () => {
+    return (): void => {
       window.removeEventListener("storage", syncLogout);
     };
   }, [history]);
 
-  const value = {
+  const value: ContextValue = {
     currentUser,
     accessToken,
     signUp,
     signIn,
-    logout
+    logout,
   };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 };

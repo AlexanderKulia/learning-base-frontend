@@ -17,14 +17,14 @@ apiClient.interceptors.response.use(
     } else {
       return Promise.reject(error);
     }
-  }
+  },
 );
 
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     return Promise.reject(error.response.data);
-  }
+  },
 );
 
 const { get, post, put, delete: destroy, patch } = apiClient;

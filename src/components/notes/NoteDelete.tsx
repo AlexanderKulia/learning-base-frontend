@@ -1,4 +1,3 @@
-import React from "react";
 import { DeleteOutline } from "@mui/icons-material";
 import { useDialog } from "../../contexts/DialogContext";
 import { useSnackbar } from "../../contexts/SnackbarContext";
@@ -10,13 +9,17 @@ interface DeleteNoteProps {
   handleDelete: (id: number) => void;
 }
 
-export const NoteDelete = ({ id, title, handleDelete }: DeleteNoteProps) => {
+export const NoteDelete = ({
+  id,
+  title,
+  handleDelete,
+}: DeleteNoteProps): JSX.Element => {
   const { handleDialog, handleDialogClose } = useDialog();
   const { handleSnackbar } = useSnackbar();
 
   return (
     <DeleteOutline
-      onClick={() => {
+      onClick={(): void => {
         handleDialog({
           title: "Delete note?",
           content: (
@@ -37,8 +40,8 @@ export const NoteDelete = ({ id, title, handleDelete }: DeleteNoteProps) => {
                   alert("Could not delete note");
                 }
               });
-            }
-          }
+            },
+          },
         });
       }}
     />

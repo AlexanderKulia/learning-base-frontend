@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/system";
 import React, { useEffect, useState } from "react";
-import useDebounce from "../../hooks/useDebounce";
+import { useDebounce } from "../../hooks/useDebounce";
 import { Tag, TagsApi } from "../../services/api";
 import { Spinner } from "../utils/Spinner";
 import { TagDelete } from "./TagDelete";
@@ -30,7 +30,7 @@ type SortOrder = "asc" | "desc";
 
 export const ROWS_PER_PAGE = 10;
 
-export const TagList = () => {
+export const TagList = (): JSX.Element => {
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -43,7 +43,7 @@ export const TagList = () => {
   const theme = useTheme();
 
   useEffect(() => {
-    const fetchTags = async () => {
+    const fetchTags = async (): Promise<void> => {
       try {
         const res = await TagsApi.index({
           params: {
@@ -66,12 +66,12 @@ export const TagList = () => {
   }, [page, rowsPerPage, debouncedSearchTerm, sortBy, sortOrder]);
 
   const handeSearchTermChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+    event: React.ChangeEvent<HTMLInputElement>,
+  ): void => {
     setSearchTerm(event.target.value);
   };
 
-  const renderTableRows = () => {
+  const renderTableRows = (): JSX.Element | JSX.Element[] => {
     if (tags.length === 0)
       return (
         <TableRow>
@@ -96,7 +96,7 @@ export const TagList = () => {
     });
   };
 
-  const handleSort = (column: SortBy) => {
+  const handleSort = (column: SortBy): void => {
     let tSortOrder = sortOrder;
 
     if (column === sortBy) {
@@ -109,7 +109,7 @@ export const TagList = () => {
     }
   };
 
-  const renderTable = () => {
+  const renderTable = (): JSX.Element => {
     return (
       <TableContainer component={Paper}>
         <Table>
@@ -119,7 +119,7 @@ export const TagList = () => {
                 <TableSortLabel
                   active={sortBy === "id"}
                   direction={sortOrder}
-                  onClick={() => {
+                  onClick={(): void => {
                     handleSort("id");
                   }}
                 >
@@ -130,7 +130,7 @@ export const TagList = () => {
                 <TableSortLabel
                   active={sortBy === "title"}
                   direction={sortOrder}
-                  onClick={() => {
+                  onClick={(): void => {
                     handleSort("title");
                   }}
                 >
@@ -141,7 +141,7 @@ export const TagList = () => {
                 <TableSortLabel
                   active={sortBy === "noteCount"}
                   direction={sortOrder}
-                  onClick={() => {
+                  onClick={(): void => {
                     handleSort("noteCount");
                   }}
                 >
@@ -159,10 +159,10 @@ export const TagList = () => {
                 count={itemCount}
                 rowsPerPage={rowsPerPage}
                 page={page - 1}
-                onPageChange={(_event, value) => {
+                onPageChange={(_event, value): void => {
                   setPage(value + 1);
                 }}
-                onRowsPerPageChange={(event) => {
+                onRowsPerPageChange={(event): void => {
                   setRowsPerPage(parseInt(event.target.value));
                 }}
               />

@@ -9,7 +9,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { useFormik } from "formik";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 import { Link as RouterLink, useHistory } from "react-router-dom";
 import { useSnackbar } from "../../contexts/SnackbarContext";
 import { NotesApi, Tag, TagsApi } from "../../services/api/index";
@@ -32,10 +32,6 @@ export const NoteForm: FunctionComponent<NoteFormProps> = ({
   formType,
 }) => {
   const [suggestedTags, setSuggestedTags] = useState<Tag[]>([]);
-  const [debouncedSuggestedTags, setDebouncedSuggestedTags] = useState<Tag[]>(
-    []
-  );
-
   const history = useHistory();
   const { handleSnackbar } = useSnackbar();
   const formik = useFormik({
@@ -60,11 +56,13 @@ export const NoteForm: FunctionComponent<NoteFormProps> = ({
   });
   const theme = useTheme();
   useEffect(() => {
-    const fetchSuggestedTags = async () => {
+    const fetchSuggestedTags = async (): Promise<void> => {
       try {
         const res = await TagsApi.index({
           params: {
             search: formik.values._tag,
+            page: 1,
+            perPage: 10,
           },
         });
         setSuggestedTags(res.data.data);
@@ -77,7 +75,7 @@ export const NoteForm: FunctionComponent<NoteFormProps> = ({
       fetchSuggestedTags();
     }, 500);
 
-    return () => {
+    return (): void => {
       clearTimeout(timerId);
     };
   }, [formik.values._tag]);
@@ -86,7 +84,7 @@ export const NoteForm: FunctionComponent<NoteFormProps> = ({
     <form
       noValidate
       onSubmit={formik.handleSubmit}
-      onKeyDown={(e) => {
+      onKeyDown={(e): void => {
         if (e.code === "Tab") {
           e.preventDefault();
         }
@@ -105,7 +103,7 @@ export const NoteForm: FunctionComponent<NoteFormProps> = ({
       />
       <RichText
         content={formik.values.content}
-        onChange={(content) => {
+        onChange={(content): void => {
           formik.setFieldValue("content", content);
         }}
       />
@@ -117,19 +115,19 @@ export const NoteForm: FunctionComponent<NoteFormProps> = ({
         options={suggestedTags.map((option) => option.title)}
         freeSolo
         value={formik.values.tags}
-        onChange={(e, value) => {
+        onChange={(e, value): void => {
           formik.setFieldValue("tags", value);
         }}
         inputValue={formik.values._tag}
-        onInputChange={(e, value) => {
+        onInputChange={(e, value): void => {
           formik.setFieldValue("_tag", value);
         }}
-        renderTags={(value: string[], getTagProps) =>
+        renderTags={(value: string[]): JSX.Element[] =>
           value.map((option: string, index: number) => (
-            <Chip label={option} {...getTagProps({ index })} />
+            <Chip label={option} key={index} />
           ))
         }
-        renderInput={(params) => (
+        renderInput={(params): JSX.Element => (
           <TextField
             margin="normal"
             {...params}

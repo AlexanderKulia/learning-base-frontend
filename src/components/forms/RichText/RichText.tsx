@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import { Box } from "@mui/material";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { FunctionComponent } from "react";
+import { FunctionComponent } from "react";
 import { MenuBar } from "./MenuBar";
 
 interface RichTextProps {

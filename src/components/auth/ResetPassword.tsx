@@ -2,24 +2,27 @@ import { css } from "@emotion/react";
 import {
   Button,
   Grid,
-  Link,
   Paper,
   TextField,
   Typography,
   useTheme,
 } from "@mui/material";
 import { useFormik } from "formik";
-import { Link as RouterLink, useHistory } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
+import { useSnackbar } from "../../contexts/SnackbarContext";
+import { useQuery } from "../../hooks/useQuery";
+import { AuthApi } from "../../services/api";
+
+interface FormValues {
+  userId: number;
+  token: string;
+  password: string;
+  confirmPassword: string;
+}
 
 const validate = (values: FormValues): Partial<FormValues> => {
   const errors: Partial<FormValues> = {};
-
-  if (!values.email) {
-    errors.email = "Required";
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-    errors.email = "Invalid email address";
-  }
 
   if (!values.password) {
     errors.password = "Required";
@@ -42,18 +45,17 @@ const validate = (values: FormValues): Partial<FormValues> => {
   return errors;
 };
 
-interface FormValues {
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
-export const SignUpPage = (): JSX.Element => {
+export const ResetPassword = (): JSX.Element => {
+  const [isValid, setIsValid] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const token = useQuery("token");
+  const userId = useQuery("id");
   const theme = useTheme();
-  const { signUp } = useAuth();
   const history = useHistory();
+  const { handleSnackbar } = useSnackbar();
   const initialValues: FormValues = {
-    email: "",
+    userId: parseInt(userId),
+    token,
     password: "",
     confirmPassword: "",
   };
@@ -62,13 +64,41 @@ export const SignUpPage = (): JSX.Element => {
     validate,
     onSubmit: async (values) => {
       try {
-        await signUp(values.email, values.password);
+        console.log(JSON.stringify(values));
+        const res = await AuthApi.resetPassword(
+          values.userId,
+          values.token,
+          values.password,
+        );
+        handleSnackbar(res.data.message);
         history.push("/signin");
       } catch (error) {
-        alert("Failed to create an account");
+        handleSnackbar("Failed to send password reset");
       }
     },
   });
+
+  useEffect(() => {
+    if (!userId || !token) {
+      setIsLoading(false);
+      return;
+    }
+
+    const verifyToken = async (): Promise<void> => {
+      try {
+        const res = await AuthApi.verifyPasswordToken(parseInt(userId), token);
+        setIsValid(res.data);
+        setIsLoading(false);
+      } catch (error) {
+        alert("Something went wrong");
+      }
+    };
+
+    verifyToken();
+  }, [userId, token]);
+
+  if (isLoading) return <p>Loading</p>;
+  if (!isValid) return <p>Invalid or missing token. Please try again</p>;
 
   return (
     <Grid
@@ -96,7 +126,7 @@ export const SignUpPage = (): JSX.Element => {
             padding: ${theme.spacing(4)};
           `}
         >
-          <Typography variant="h5">Sign up</Typography>
+          <Typography variant="h5">Reset password</Typography>
           <form
             css={css`
               width: 100%;
@@ -105,25 +135,6 @@ export const SignUpPage = (): JSX.Element => {
             noValidate
             onSubmit={formik.handleSubmit}
           >
-            <TextField
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.email && formik.errors.email ? true : false}
-              helperText={
-                formik.touched.email && formik.errors.email
-                  ? formik.errors.email
-                  : null
-              }
-              margin="normal"
-              required
-              fullWidth
-              label="Email"
-              type="email"
-              id="email"
-              name="email"
-              autoComplete="email"
-            />
             <TextField
               value={formik.values.password}
               onChange={formik.handleChange}
@@ -139,7 +150,7 @@ export const SignUpPage = (): JSX.Element => {
               margin="normal"
               required
               fullWidth
-              label="Password"
+              label="New password"
               type="password"
               id="password"
               name="password"
@@ -172,29 +183,12 @@ export const SignUpPage = (): JSX.Element => {
               disabled={formik.isSubmitting}
               type="submit"
               fullWidth
-              variant="contained"
               css={css`
                 margin: ${theme.spacing(3, 0, 2)};
               `}
             >
-              Sign Up
+              Submit
             </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link
-                  component={RouterLink}
-                  to="/forgot_password"
-                  variant="body2"
-                >
-                  Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link component={RouterLink} to="/signin" variant="body2">
-                  Already have an account? Sign in
-                </Link>
-              </Grid>
-            </Grid>
           </form>
         </Paper>
       </Grid>

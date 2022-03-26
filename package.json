@@ -22,14 +22,16 @@
     "axios": "^0.23.0",
     "dotenv": "^10.0.0",
     "formik": "^2.2.9",
+    "highcharts": "^10.0.0",
+    "highcharts-react-official": "^3.1.0",
     "jwt-decode": "^3.1.2",
+    "prettier": "^2.6.1",
     "puppeteer": "^13.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "^5.3.0",
     "react-scripts": "^4.0.3",
     "source-map-explorer": "^2.5.2",
-    "typescript": "^4.4.4",
     "web-vitals": "^2.1.2"
   },
   "scripts": {
@@ -37,16 +39,9 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ],
-    "rules": {
-      "@typescript-eslint/no-unused-vars": "off"
-    }
+    "eject": "react-scripts eject",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\"",
+    "lint": "eslint --ext .tsx,.ts src/ --fix"
   },
   "browserslist": {
     "production": [
@@ -66,6 +61,11 @@
     "@types/node": "^16.10.8",
     "@types/react": "^17.0.29",
     "@types/react-dom": "^17.0.9",
-    "@types/react-router-dom": "^5.3.1"
+    "@types/react-router-dom": "^5.3.1",
+    "@typescript-eslint/eslint-plugin": "^5.16.0",
+    "@typescript-eslint/parser": "^5.16.0",
+    "dotenv-webpack": "^7.1.0",
+    "eslint": "^7.32.0",
+    "typescript": "^4.6.3"
   }
 }

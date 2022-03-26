@@ -1,13 +1,13 @@
-import React, { FunctionComponent } from "react";
+import { LoadingButton } from "@mui/lab";
 import {
-  Dialog as MuiDialog,
   Button,
+  Dialog as MuiDialog,
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
 } from "@mui/material";
-import { LoadingButton } from "@mui/lab";
+import { FunctionComponent } from "react";
 import { useDialog } from "../../contexts/DialogContext";
 
 export interface DialogProps {
@@ -19,10 +19,12 @@ export interface DialogProps {
   };
 }
 
-export const Dialog: FunctionComponent<{ isOpen: boolean; isLoading: boolean } & DialogProps> = (props) => {
+export const Dialog: FunctionComponent<
+  { isOpen: boolean; isLoading: boolean } & DialogProps
+> = (props) => {
   const { setIsOpen } = useDialog();
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     setIsOpen(false);
   };
 
@@ -36,18 +38,20 @@ export const Dialog: FunctionComponent<{ isOpen: boolean; isLoading: boolean } &
     >
       <DialogTitle id="dialog-title">{props.title}</DialogTitle>
       <DialogContent>
-        <DialogContentText id="dialog-description">{props.content}</DialogContentText>
+        <DialogContentText id="dialog-description">
+          {props.content}
+        </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button
-          onClick={() => {
+          onClick={(): void => {
             setIsOpen(false);
           }}
         >
           Cancel
         </Button>
         <LoadingButton
-          onClick={() => {
+          onClick={(): void => {
             props.acceptButton.onClick();
           }}
           loading={props.isLoading}

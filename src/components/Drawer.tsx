@@ -1,6 +1,13 @@
-import React from "react";
 import { css } from "@emotion/react";
-import { Drawer as MuiDrawer, List, ListItem, ListItemButton, Toolbar, Box, ListItemText } from "@mui/material";
+import {
+  Box,
+  Drawer as MuiDrawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Toolbar,
+} from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
 export const drawerWidth = 96;
@@ -10,11 +17,12 @@ interface DrawerItems {
 }
 
 const drawerItems: DrawerItems = {
+  Home: "/home",
   Notes: "/notes",
-  Tags: "/tags"
+  Tags: "/tags",
 };
 
-export const Drawer = () => {
+export const Drawer = (): JSX.Element => {
   return (
     <MuiDrawer
       variant="permanent"

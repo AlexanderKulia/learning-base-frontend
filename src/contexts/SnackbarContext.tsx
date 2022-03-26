@@ -6,7 +6,7 @@ interface SnackbarContextValue {
 }
 
 const SnackbarContext = createContext<SnackbarContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 export interface SnackbarState {
@@ -14,7 +14,7 @@ export interface SnackbarState {
   message: string;
 }
 
-export const useSnackbar = () => {
+export const useSnackbar = (): SnackbarContextValue => {
   const context = useContext(SnackbarContext);
   if (context === undefined) {
     throw new Error("useSnackbar must be within SnackbarProvider");
@@ -30,14 +30,14 @@ export const SnackbarProvider: FunctionComponent = ({ children }) => {
   });
   const { isOpen, message } = state;
 
-  const handleSnackbar = (message: string) => {
+  const handleSnackbar = (message: string): void => {
     setState({ ...state, message, isOpen: true });
   };
 
   const handleSnackbarClose = (
     event: Event | React.SyntheticEvent<any, Event>,
-    reason?: string
-  ) => {
+    reason?: string,
+  ): void => {
     // prevents snackbar from closing on clickaway (anywhere in the app)
     if (reason === "clickaway") {
       return;

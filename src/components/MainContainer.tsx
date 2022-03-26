@@ -1,6 +1,5 @@
-import React from "react";
-import { Toolbar, useTheme, Box, Grid } from "@mui/material";
 import { css } from "@emotion/react";
+import { Box, Grid, Toolbar, useTheme } from "@mui/material";
 import { FunctionComponent } from "react";
 
 export const MainContainer: FunctionComponent = ({ children }): JSX.Element => {

@@ -1,9 +1,17 @@
-import React, { FunctionComponent, useState } from "react";
-import { EditOutlined } from "@mui/icons-material";
-import { Dialog, DialogContent, DialogTitle, TextField, DialogActions, Button, useTheme } from "@mui/material";
 import { css } from "@emotion/react";
-import { Tag, TagsApi } from "../../services/api";
+import { EditOutlined } from "@mui/icons-material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  useTheme,
+} from "@mui/material";
+import React, { FunctionComponent, useState } from "react";
 import { useSnackbar } from "../../contexts/SnackbarContext";
+import { Tag, TagsApi } from "../../services/api";
 
 interface TagEditProps {
   tag: Tag;
@@ -16,21 +24,23 @@ export const TagEdit: FunctionComponent<TagEditProps> = ({ tag, setTags }) => {
   const theme = useTheme();
   const { handleSnackbar } = useSnackbar();
 
-  const handeTagChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handeTagChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setNewTagTitle(event.target.value);
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     setIsOpen(false);
   };
 
-  const handleUpdate = (tag: Tag) => {
+  const handleUpdate = (tag: Tag): void => {
     setTags((prevState) =>
-      prevState.map((el) => (el.id === tag.id ? Object.assign({}, el, { title: newTagTitle }) : el))
+      prevState.map((el) =>
+        el.id === tag.id ? Object.assign({}, el, { title: newTagTitle }) : el,
+      ),
     );
   };
 
-  const handleSave = async () => {
+  const handleSave = async (): Promise<void> => {
     try {
       await TagsApi.update(tag.id, { title: newTagTitle });
       handleClose();
@@ -44,14 +54,18 @@ export const TagEdit: FunctionComponent<TagEditProps> = ({ tag, setTags }) => {
   return (
     <>
       <EditOutlined
-        onClick={() => {
+        onClick={(): void => {
           setIsOpen(true);
         }}
       />
       <Dialog open={isOpen} onClose={handleClose}>
         <DialogTitle>Edit Tag</DialogTitle>
         <DialogContent>
-          <TextField size="small" value={newTagTitle} onChange={handeTagChange}></TextField>
+          <TextField
+            size="small"
+            value={newTagTitle}
+            onChange={handeTagChange}
+          ></TextField>
         </DialogContent>
         <DialogActions
           css={css`
