@@ -19,81 +19,66 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { Editor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import { useEffect, useState } from "react";
+import { AxiosResponse } from "axios";
+import { useState } from "react";
+import { useQuery } from "react-query";
 import { Link as RouterLink, useHistory } from "react-router-dom";
-import { Note, NotesApi, Tag, TagsApi } from "../../services/api/index";
+import { useDebounce } from "../../hooks/useDebounce";
+import {
+  Note,
+  NotesApi,
+  Paginated,
+  Tag,
+  TagsApi,
+} from "../../services/api/index";
+import { RichText } from "../utils/RichText/RichText";
 import { Spinner } from "../utils/Spinner";
 import { NoteDelete } from "./NoteDelete";
 
 export const PER_PAGE = 10;
 
 export const NoteList = (): JSX.Element => {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+  const debouncedSearchTerm = useDebounce<string>(searchTerm, 500);
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [page, setPage] = useState<number>(1);
-  const [pageCount, setPageCount] = useState<number>(1);
   const theme = useTheme();
   const history = useHistory();
-
-  useEffect(() => {
-    const fetchNotes = async (): Promise<void> => {
-      try {
-        const notesRes = await NotesApi.index({
-          params: {
-            search: debouncedSearchTerm,
-            tags: tagsFilter,
-            page,
-            perPage: PER_PAGE,
-          },
-        });
-        setNotes(notesRes.data.data);
-        setPageCount(notesRes.data.meta.pageCount);
-
-        setIsLoading(false);
-      } catch (e) {
-        alert("Could not fetch notes");
-      }
-    };
-
-    fetchNotes();
-  }, [debouncedSearchTerm, tagsFilter, page]);
-
-  useEffect(() => {
-    const fetchTags = async (): Promise<void> => {
-      try {
-        const tagsRes = await TagsApi.index({
-          params: { page: 1, perPage: 10 },
-        });
-        setTags(tagsRes.data.data);
-      } catch (e) {
-        alert("Could not fetch tags");
-      }
-    };
-
-    fetchTags();
-  }, []);
-
-  useEffect(() => {
-    const timerId = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 500);
-
-    return (): void => {
-      clearTimeout(timerId);
-    };
-  }, [searchTerm]);
-
-  const handleDelete = (id: number): void => {
-    setNotes(notes.filter((note) => note.id !== id));
-  };
+  const notesQuery = useQuery<
+    AxiosResponse<Paginated<Note>>,
+    Error,
+    Paginated<Note>
+  >(
+    ["notes", debouncedSearchTerm, page, tagsFilter],
+    () =>
+      NotesApi.index({
+        params: {
+          search: debouncedSearchTerm,
+          tags: tagsFilter,
+          page,
+          perPage: PER_PAGE,
+        },
+      }),
+    {
+      select: (res) => res.data,
+    },
+  );
+  const tagsQuery = useQuery<AxiosResponse<Paginated<Tag>>, Error, Tag[]>(
+    "tagsFilter",
+    () =>
+      TagsApi.index({
+        params: {
+          page,
+          perPage: PER_PAGE,
+        },
+      }),
+    { select: (res) => res.data.data },
+  );
 
   const renderFilters = (): JSX.Element => {
+    if (!tagsQuery.isSuccess) return <span>Failed to load tags</span>;
+    const tags = tagsQuery.data;
+
     return (
       <>
         <Autocomplete
@@ -124,7 +109,7 @@ export const NoteList = (): JSX.Element => {
             </li>
           )}
           value={tagsFilter}
-          onChange={(e, newTagsFilter): void => {
+          onChange={(_e, newTagsFilter): void => {
             setTagsFilter(newTagsFilter);
           }}
         />
@@ -162,14 +147,13 @@ export const NoteList = (): JSX.Element => {
     ));
   };
 
-  const renderNotes = notes.map(
-    ({ id, title, content, tags }, index: number) => {
-      const editor = new Editor({
-        editable: false,
-        content: JSON.parse(content),
-        extensions: [StarterKit],
-      });
+  const renderNotes = (): JSX.Element | JSX.Element[] => {
+    if (!notesQuery.isSuccess) return <span>Failed to load notes</span>;
+    const notes = notesQuery.data.data;
+    if (Array.isArray(notes) && !notes.length)
+      return <span>No notes found</span>;
 
+    return notes.map(({ id, title, content, tags }, index: number) => {
       return (
         <Grid item md={3} key={id}>
           <Grow in={true} timeout={300 + 300 * index}>
@@ -187,11 +171,7 @@ export const NoteList = (): JSX.Element => {
                 title={title}
                 action={
                   <IconButton>
-                    <NoteDelete
-                      id={id}
-                      title={title}
-                      handleDelete={handleDelete}
-                    />
+                    <NoteDelete note={{ id, title, content, tags }} />
                   </IconButton>
                 }
               />
@@ -214,7 +194,7 @@ export const NoteList = (): JSX.Element => {
                       -webkit-box-orient: vertical;
                     `}
                   >
-                    <EditorContent editor={editor} />
+                    <RichText content={content} editable={false} />
                   </Box>
                 </CardContent>
               </CardActionArea>
@@ -230,8 +210,8 @@ export const NoteList = (): JSX.Element => {
           </Grow>
         </Grid>
       );
-    },
-  );
+    });
+  };
 
   return (
     <>
@@ -245,29 +225,42 @@ export const NoteList = (): JSX.Element => {
           My Notes
         </Typography>
         {renderCreateButton()}
-        {renderFilters()}
-        <TextField
-          id="notes-search"
-          value={searchTerm}
-          onChange={(e): void => {
-            setSearchTerm(e.target.value);
-          }}
-          label="Search notes by content"
-          variant="standard"
-        />
-        <Pagination
-          count={pageCount}
-          page={page}
-          onChange={(_event, value): void => {
-            setPage(value);
-          }}
-        />
+        <Grid
+          container
+          spacing={2}
+          justifyContent="flex-start"
+          alignItems="center"
+        >
+          <Grid item md={4}>
+            {renderFilters()}
+          </Grid>
+          <Grid item md={4}>
+            <TextField
+              id="notes-search"
+              value={searchTerm}
+              onChange={(e): void => {
+                setSearchTerm(e.target.value);
+              }}
+              label="Search notes by content"
+              variant="standard"
+            />
+          </Grid>
+          <Grid item md={4}>
+            <Pagination
+              count={notesQuery.data?.meta.pageCount || 1}
+              page={page}
+              onChange={(_event, value): void => {
+                setPage(value);
+              }}
+            />
+          </Grid>
+        </Grid>
       </Grid>
-      {isLoading ? (
+      {notesQuery.isLoading ? (
         <Spinner />
       ) : (
         <Grid container direction="row">
-          {renderNotes}
+          {renderNotes()}
         </Grid>
       )}
     </>

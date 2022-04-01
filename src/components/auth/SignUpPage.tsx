@@ -11,6 +11,7 @@ import {
 import { useFormik } from "formik";
 import { Link as RouterLink, useHistory } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useSnackbar } from "../../contexts/SnackbarContext";
 
 const validate = (values: FormValues): Partial<FormValues> => {
   const errors: Partial<FormValues> = {};
@@ -49,6 +50,7 @@ interface FormValues {
 }
 
 export const SignUpPage = (): JSX.Element => {
+  const { handleSnackbar } = useSnackbar();
   const theme = useTheme();
   const { signUp } = useAuth();
   const history = useHistory();
@@ -65,7 +67,7 @@ export const SignUpPage = (): JSX.Element => {
         await signUp(values.email, values.password);
         history.push("/signin");
       } catch (error) {
-        alert("Failed to create an account");
+        handleSnackbar("Failed to create an account", "error");
       }
     },
   });
@@ -77,7 +79,8 @@ export const SignUpPage = (): JSX.Element => {
       justifyContent="center"
       alignItems="center"
       css={css`
-        min-height: 100vh;
+        position: fixed;
+        min-height: 100%;
       `}
     >
       <Grid

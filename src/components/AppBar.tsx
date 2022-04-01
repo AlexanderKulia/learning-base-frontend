@@ -1,20 +1,28 @@
 import { css } from "@emotion/react";
+import { AccountCircle } from "@mui/icons-material";
 import {
   Alert,
   AlertTitle,
   AppBar as MuiAppBar,
   Box,
-  Button,
+  IconButton,
   Link,
+  Menu,
+  MenuItem,
   Toolbar,
-  Typography,
   useTheme,
 } from "@mui/material";
+import React, { useState } from "react";
 import { Link as RouterLink, useHistory } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useSnackbar } from "../contexts/SnackbarContext";
 
 export const AppBar = (): JSX.Element => {
+  const [anchorEl, setAnchorEl] = useState<
+    (EventTarget & HTMLButtonElement) | null
+  >(null);
   const theme = useTheme();
+  const { handleSnackbar } = useSnackbar();
   const { currentUser, logout } = useAuth();
   const history = useHistory();
 
@@ -23,37 +31,45 @@ export const AppBar = (): JSX.Element => {
       logout();
       history.push("/signin");
     } catch {
-      alert("Failed to log out");
+      handleSnackbar("Failed to log out", "error");
     }
   };
 
+  const handleMenu = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = (): void => {
+    setAnchorEl(null);
+  };
+
   const handleEmailVerification = (): JSX.Element | null => {
-    if (currentUser && !currentUser.emailVerified)
-      return (
-        <Alert
-          severity="info"
-          css={css`
-            position: fixed;
-            left: 50%;
-            transform: translate(-50%);
-            z-index: ${theme.zIndex.drawer + 2};
-          `}
+    if (currentUser && currentUser.emailVerified) return null;
+
+    return (
+      <Alert
+        severity="info"
+        css={css`
+          position: fixed;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: ${theme.zIndex.drawer + 2};
+        `}
+      >
+        <AlertTitle>
+          Verification link has been sent to your email address
+        </AlertTitle>
+        Please click on the link from the email or{" "}
+        <a
+          href={`${process.env.REACT_APP_FRONTEND_URL}/send_verification`}
+          target="_blank"
+          rel="noreferrer"
         >
-          <AlertTitle>
-            Verification link has been sent to your email address
-          </AlertTitle>
-          Please click on the link from the email or{" "}
-          <a
-            href={`${process.env.REACT_APP_FRONTEND_URL}/send_verification`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            click here
-          </a>{" "}
-          if you did not receive the email
-        </Alert>
-      );
-    return null;
+          click here
+        </a>{" "}
+        if you did not receive the email
+      </Alert>
+    );
   };
 
   return (
@@ -82,10 +98,31 @@ export const AppBar = (): JSX.Element => {
               Learning Base
             </Link>
           </Box>
-          <Typography variant="h6">{JSON.stringify(currentUser)}</Typography>
-          <Button variant="text" color="inherit" onClick={handleLogout}>
-            Logout
-          </Button>
+          <IconButton size="large" onClick={handleMenu} color="inherit">
+            <AccountCircle />
+          </IconButton>
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={handleClose}>
+              <Link
+                color="inherit"
+                underline="none"
+                component={RouterLink}
+                to="/change_password"
+              >
+                Change password
+              </Link>
+            </MenuItem>
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          </Menu>
         </Toolbar>
       </MuiAppBar>
     </>

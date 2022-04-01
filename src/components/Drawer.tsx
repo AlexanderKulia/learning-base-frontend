@@ -17,9 +17,9 @@ interface DrawerItems {
 }
 
 const drawerItems: DrawerItems = {
-  Home: "/home",
   Notes: "/notes",
   Tags: "/tags",
+  Stats: "/stats",
 };
 
 export const Drawer = (): JSX.Element => {

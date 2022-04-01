@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import {
   Autocomplete,
+  Box,
   Button,
   Chip,
   Grid,
@@ -8,12 +9,21 @@ import {
   TextField,
   useTheme,
 } from "@mui/material";
+import { AxiosResponse } from "axios";
 import { useFormik } from "formik";
-import { FunctionComponent, useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Link as RouterLink, useHistory } from "react-router-dom";
 import { useSnackbar } from "../../contexts/SnackbarContext";
-import { NotesApi, Tag, TagsApi } from "../../services/api/index";
-import { RichText } from "./RichText/RichText";
+import { useDebounce } from "../../hooks/useDebounce";
+import {
+  CreateNoteDto,
+  NotesApi,
+  Paginated,
+  Tag,
+  TagsApi,
+  UpdateNoteDto,
+} from "../../services/api/index";
+import { RichText } from "../utils/RichText/RichText";
 
 export interface NoteFormValues {
   id: number;
@@ -27,58 +37,96 @@ interface NoteFormProps {
   formType: "create" | "edit";
 }
 
-export const NoteForm: FunctionComponent<NoteFormProps> = ({
+const formMessages = {
+  create: {
+    success: "Note successfully created",
+    error: "Could not create note",
+  },
+  edit: {
+    success: "Note successfully updated",
+    error: "Could not update note",
+  },
+};
+
+export const NoteForm = ({
   formValues,
   formType,
-}) => {
-  const [suggestedTags, setSuggestedTags] = useState<Tag[]>([]);
-  const history = useHistory();
-  const { handleSnackbar } = useSnackbar();
+}: NoteFormProps): JSX.Element => {
+  const queryClient = useQueryClient();
+  const createMutation = useMutation(
+    (dto: CreateNoteDto) => NotesApi.create(dto),
+    {
+      onSettled: () => {
+        queryClient.invalidateQueries("note");
+        queryClient.invalidateQueries("notes");
+      },
+    },
+  );
+  const updateMutation = useMutation(
+    ({ id, title, content, tags }: UpdateNoteDto) =>
+      NotesApi.update(id, { title, content, tags }),
+    {
+      onSettled: () => {
+        queryClient.invalidateQueries("note");
+        queryClient.invalidateQueries("notes");
+      },
+    },
+  );
   const formik = useFormik({
-    initialValues: { ...formValues, _tag: "" },
+    initialValues: { ...formValues, tag: "" },
     onSubmit: async ({ id, title, content, tags }) => {
-      try {
-        switch (formType) {
-          case "create":
-            await NotesApi.create({ title, content, tags });
-            handleSnackbar("Note created successfully");
-            break;
-          case "edit":
-            await NotesApi.update(id, { title, content, tags });
-            handleSnackbar(`Note ${title} updated successfully`);
-            break;
-        }
-        history.push("/");
-      } catch (error) {
-        handleSnackbar("Failed to submit the note");
-      }
+      if (formType === "create")
+        createMutation.mutate(
+          { title, content, tags },
+          {
+            onSuccess: () => {
+              handleSnackbar(formMessages[formType]["success"]);
+            },
+            onError: () => {
+              handleSnackbar(formMessages[formType]["error"], "error");
+            },
+            onSettled: () => {
+              history.push("/");
+            },
+          },
+        );
+      if (formType === "edit")
+        updateMutation.mutate(
+          { id, title, content, tags },
+          {
+            onSuccess: () => {
+              handleSnackbar(formMessages[formType]["success"]);
+            },
+            onError: () => {
+              handleSnackbar(formMessages[formType]["error"], "error");
+            },
+            onSettled: () => {
+              history.push("/");
+            },
+          },
+        );
     },
   });
+  const debouncedTag = useDebounce(formik.values.tag, 500);
+  const suggestedTagsQuery = useQuery<
+    AxiosResponse<Paginated<Tag>>,
+    Error,
+    Tag[]
+  >(
+    ["suggestedTags", debouncedTag],
+    () =>
+      TagsApi.index({
+        params: {
+          search: debouncedTag,
+          page: 1,
+          perPage: 10,
+        },
+      }),
+    { select: (res) => res.data.data },
+  );
   const theme = useTheme();
-  useEffect(() => {
-    const fetchSuggestedTags = async (): Promise<void> => {
-      try {
-        const res = await TagsApi.index({
-          params: {
-            search: formik.values._tag,
-            page: 1,
-            perPage: 10,
-          },
-        });
-        setSuggestedTags(res.data.data);
-      } catch (e) {
-        alert("Could not fetch suggested tags");
-      }
-    };
-
-    const timerId = setTimeout(() => {
-      fetchSuggestedTags();
-    }, 500);
-
-    return (): void => {
-      clearTimeout(timerId);
-    };
-  }, [formik.values._tag]);
+  const history = useHistory();
+  const { handleSnackbar } = useSnackbar();
 
   return (
     <form
@@ -101,26 +149,36 @@ export const NoteForm: FunctionComponent<NoteFormProps> = ({
         id="title"
         name="title"
       />
-      <RichText
-        content={formik.values.content}
-        onChange={(content): void => {
-          formik.setFieldValue("content", content);
-        }}
-      />
+      <Box
+        css={css`
+          border: 1px solid #c4c4c4;
+        `}
+      >
+        <RichText
+          content={formik.values.content}
+          onUpdate={(content): void => {
+            formik.setFieldValue("content", content);
+          }}
+          renderMenu
+        />
+      </Box>
       <Autocomplete
         multiple
         size="small"
-        id="_tag"
-        //TODO rework autocomplete
-        options={suggestedTags.map((option) => option.title)}
+        id="tag"
+        options={
+          suggestedTagsQuery.data
+            ? suggestedTagsQuery.data.map((option) => option.title)
+            : []
+        }
         freeSolo
         value={formik.values.tags}
         onChange={(e, value): void => {
           formik.setFieldValue("tags", value);
         }}
-        inputValue={formik.values._tag}
+        inputValue={formik.values.tag}
         onInputChange={(e, value): void => {
-          formik.setFieldValue("_tag", value);
+          formik.setFieldValue("tag", value);
         }}
         renderTags={(value: string[]): JSX.Element[] =>
           value.map((option: string, index: number) => (

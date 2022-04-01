@@ -11,6 +11,7 @@ import {
 import { useFormik } from "formik";
 import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useSnackbar } from "../../contexts/SnackbarContext";
 
 interface FormValues {
   email: string;
@@ -18,6 +19,7 @@ interface FormValues {
 }
 
 export const SignInPage = (): JSX.Element => {
+  const { handleSnackbar } = useSnackbar();
   const theme = useTheme();
   const { signIn } = useAuth();
   const initialValues: FormValues = {
@@ -30,7 +32,7 @@ export const SignInPage = (): JSX.Element => {
       try {
         await signIn(values.email, values.password);
       } catch (error) {
-        alert("Failed to sign in");
+        handleSnackbar("Failed to sign in", "error");
       }
     },
   });
@@ -42,7 +44,8 @@ export const SignInPage = (): JSX.Element => {
       justifyContent="center"
       alignItems="center"
       css={css`
-        min-height: 100vh;
+        position: fixed;
+        min-height: 100%;
       `}
     >
       <Grid

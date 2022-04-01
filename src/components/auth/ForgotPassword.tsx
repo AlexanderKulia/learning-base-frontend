@@ -31,7 +31,8 @@ export const ForgotPassword = (): JSX.Element => {
         handleSnackbar(res.data.message);
         history.push("/signin");
       } catch (error) {
-        alert("Failed to send password reset");
+        handleSnackbar("Failed to send password reset", "error");
+        history.push("/signin");
       }
     },
   });

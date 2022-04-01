@@ -1,6 +1,7 @@
+import { AxiosResponse } from "axios";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 import { ChartsApi, HomeChartData } from "../../services/api";
 import { Spinner } from "../utils/Spinner";
 
@@ -36,27 +37,21 @@ const options: Highcharts.Options = {
   },
 };
 
-export const Home = (): JSX.Element => {
-  const [chartData, setChartData] = useState<HomeChartData[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+export const Stats = (): JSX.Element => {
+  const statsQuery = useQuery<
+    AxiosResponse<HomeChartData[]>,
+    Error,
+    HomeChartData[]
+  >("stats", () => ChartsApi.getHomeChartData(), { select: (res) => res.data });
 
-  useEffect(() => {
-    const fetchChartData = async (): Promise<void> => {
-      try {
-        const chartDataRes = await ChartsApi.getHomeChartData();
-        setChartData(chartDataRes.data);
-        setIsLoading(false);
-      } catch (error) {
-        alert("Could not fetch chart data");
-      }
-    };
-
-    fetchChartData();
-  }, []);
+  if (statsQuery.isLoading) return <Spinner />;
+  if (!statsQuery.isSuccess) return <span>Failed to load stats</span>;
+  if (Array.isArray(statsQuery.data) && !statsQuery.data.length)
+    return <span>Seems like you dont have any activity yet</span>;
 
   const handleXAxis = (): Highcharts.Options["xAxis"] => {
     return {
-      categories: chartData.map((item) => {
+      categories: statsQuery.data.map((item) => {
         const date = new Date(item.day);
         return `${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`;
       }),
@@ -67,25 +62,19 @@ export const Home = (): JSX.Element => {
     return [
       {
         type: "column",
-        data: chartData.map((item) => item.count),
+        data: statsQuery.data.map((item) => item.count),
       },
     ];
   };
 
   return (
-    <>
-      {isLoading ? (
-        <Spinner />
-      ) : (
-        <HighchartsReact
-          highcharts={Highcharts}
-          options={{
-            ...options,
-            xAxis: handleXAxis(),
-            series: handleSeries(),
-          }}
-        />
-      )}
-    </>
+    <HighchartsReact
+      highcharts={Highcharts}
+      options={{
+        ...options,
+        xAxis: handleXAxis(),
+        series: handleSeries(),
+      }}
+    />
   );
 };

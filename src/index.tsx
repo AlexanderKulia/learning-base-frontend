@@ -2,6 +2,8 @@ import { CssBaseline } from "@mui/material";
 import { createTheme, Theme, ThemeProvider } from "@mui/material/styles";
 import dotenv from "dotenv";
 import ReactDOM from "react-dom";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 import { BrowserRouter } from "react-router-dom";
 import { App } from "./components/App";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -13,6 +15,8 @@ dotenv.config();
 declare module "@mui/material/styles" {
   interface DefaultTheme extends Theme {}
 }
+
+const queryClient = new QueryClient();
 
 const theme = createTheme({
   palette: {
@@ -105,15 +109,18 @@ const theme = createTheme({
 ReactDOM.render(
   <ThemeProvider theme={theme}>
     <CssBaseline />
-    <BrowserRouter>
-      <AuthProvider>
-        <DialogProvider>
-          <SnackbarProvider>
-            <App />
-          </SnackbarProvider>
-        </DialogProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryDevtools initialIsOpen={false} />
+      <BrowserRouter>
+        <AuthProvider>
+          <DialogProvider>
+            <SnackbarProvider>
+              <App />
+            </SnackbarProvider>
+          </DialogProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   </ThemeProvider>,
   document.getElementById("root"),
 );

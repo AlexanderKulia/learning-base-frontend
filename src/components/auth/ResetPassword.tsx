@@ -8,11 +8,13 @@ import {
   useTheme,
 } from "@mui/material";
 import { useFormik } from "formik";
-import { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 import { useHistory } from "react-router-dom";
 import { useSnackbar } from "../../contexts/SnackbarContext";
-import { useQuery } from "../../hooks/useQuery";
+import { useQueryParams } from "../../hooks/useQueryParams";
 import { AuthApi } from "../../services/api";
+import { Spinner } from "../utils/Spinner";
+import { SystemMessage } from "../utils/SystemMessage";
 
 interface FormValues {
   userId: number;
@@ -46,10 +48,8 @@ const validate = (values: FormValues): Partial<FormValues> => {
 };
 
 export const ResetPassword = (): JSX.Element => {
-  const [isValid, setIsValid] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const token = useQuery("token");
-  const userId = useQuery("id");
+  const token = useQueryParams("token");
+  const userId = useQueryParams("id");
   const theme = useTheme();
   const history = useHistory();
   const { handleSnackbar } = useSnackbar();
@@ -64,7 +64,6 @@ export const ResetPassword = (): JSX.Element => {
     validate,
     onSubmit: async (values) => {
       try {
-        console.log(JSON.stringify(values));
         const res = await AuthApi.resetPassword(
           values.userId,
           values.token,
@@ -73,32 +72,25 @@ export const ResetPassword = (): JSX.Element => {
         handleSnackbar(res.data.message);
         history.push("/signin");
       } catch (error) {
-        handleSnackbar("Failed to send password reset");
+        handleSnackbar("Failed to send password reset", "error");
+        history.push("/signin");
       }
     },
   });
+  const verifyQuery = useQuery(
+    "verifyPasswordToken",
+    () => AuthApi.verifyPasswordToken(parseInt(userId), token),
+    {
+      enabled: !!userId && !!token,
+      select: (res) => res.data,
+    },
+  );
 
-  useEffect(() => {
-    if (!userId || !token) {
-      setIsLoading(false);
-      return;
-    }
-
-    const verifyToken = async (): Promise<void> => {
-      try {
-        const res = await AuthApi.verifyPasswordToken(parseInt(userId), token);
-        setIsValid(res.data);
-        setIsLoading(false);
-      } catch (error) {
-        alert("Something went wrong");
-      }
-    };
-
-    verifyToken();
-  }, [userId, token]);
-
-  if (isLoading) return <p>Loading</p>;
-  if (!isValid) return <p>Invalid or missing token. Please try again</p>;
+  if (!userId || !token)
+    return <SystemMessage content={"Missing token. Please try again"} />;
+  if (verifyQuery.isLoading) return <Spinner />;
+  if (!verifyQuery.isSuccess || !verifyQuery.data)
+    return <SystemMessage content={"Invalid token. Please try again"} />;
 
   return (
     <Grid

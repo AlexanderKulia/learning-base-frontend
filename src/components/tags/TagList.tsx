@@ -17,9 +17,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/system";
-import React, { useEffect, useState } from "react";
+import { AxiosResponse } from "axios";
+import React, { useState } from "react";
+import { useQuery } from "react-query";
 import { useDebounce } from "../../hooks/useDebounce";
-import { Tag, TagsApi } from "../../services/api";
+import { Paginated, Tag, TagsApi } from "../../services/api";
 import { Spinner } from "../utils/Spinner";
 import { TagDelete } from "./TagDelete";
 import { TagEdit } from "./TagEdit";
@@ -31,39 +33,36 @@ type SortOrder = "asc" | "desc";
 export const ROWS_PER_PAGE = 10;
 
 export const TagList = (): JSX.Element => {
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const debouncedSearchTerm = useDebounce<string>(searchTerm, 500);
   const [sortBy, setSortBy] = useState<SortBy>("id");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [page, setPage] = useState<number>(1);
-  const [itemCount, setItemCount] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<number>(ROWS_PER_PAGE);
+  const tagsQuery = useQuery<
+    AxiosResponse<Paginated<Tag>>,
+    Error,
+    Paginated<Tag>
+  >(
+    ["tags", { page, rowsPerPage, debouncedSearchTerm, sortBy, sortOrder }],
+    () =>
+      TagsApi.index({
+        params: {
+          search: debouncedSearchTerm,
+          sortBy,
+          sortOrder,
+          page,
+          perPage: rowsPerPage,
+        },
+      }),
+    {
+      select: (res) => res.data,
+    },
+  );
   const theme = useTheme();
 
-  useEffect(() => {
-    const fetchTags = async (): Promise<void> => {
-      try {
-        const res = await TagsApi.index({
-          params: {
-            search: debouncedSearchTerm,
-            sortBy,
-            sortOrder,
-            page,
-            perPage: rowsPerPage,
-          },
-        });
-        setTags(res.data.data);
-        setItemCount(res.data.meta.itemCount);
-
-        setIsLoading(false);
-      } catch (e) {
-        alert("Could not fetch tags");
-      }
-    };
-    fetchTags();
-  }, [page, rowsPerPage, debouncedSearchTerm, sortBy, sortOrder]);
+  if (tagsQuery.isLoading) return <Spinner />;
+  if (!tagsQuery.isSuccess) return <span>Failed to load tags</span>;
 
   const handeSearchTermChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -72,6 +71,7 @@ export const TagList = (): JSX.Element => {
   };
 
   const renderTableRows = (): JSX.Element | JSX.Element[] => {
+    const tags = tagsQuery.data.data;
     if (tags.length === 0)
       return (
         <TableRow>
@@ -88,8 +88,8 @@ export const TagList = (): JSX.Element => {
           <TableCell>{tag.title}</TableCell>
           <TableCell>{tag._count.notes}</TableCell>
           <TableCell>
-            <TagEdit tag={tag} setTags={setTags} />
-            <TagDelete tag={tag} setTags={setTags} />
+            <TagEdit tag={tag} />
+            <TagDelete tag={tag} />
           </TableCell>
         </TableRow>
       );
@@ -156,7 +156,7 @@ export const TagList = (): JSX.Element => {
             <TableRow>
               <TablePagination
                 colSpan={3}
-                count={itemCount}
+                count={tagsQuery.data.meta.pageCount}
                 rowsPerPage={rowsPerPage}
                 page={page - 1}
                 onPageChange={(_event, value): void => {
@@ -209,7 +209,7 @@ export const TagList = (): JSX.Element => {
           ></TextField>
         </Grid>
       </Grid>
-      {isLoading ? <Spinner /> : renderTable()}
+      {tagsQuery.isLoading ? <Spinner /> : renderTable()}
     </Grid>
   );
 };

@@ -9,16 +9,46 @@ import {
   TextField,
   useTheme,
 } from "@mui/material";
-import React, { FunctionComponent, useState } from "react";
+import React, { useState } from "react";
+import { useMutation, useQueryClient } from "react-query";
 import { useSnackbar } from "../../contexts/SnackbarContext";
-import { Tag, TagsApi } from "../../services/api";
+import { Tag, TagsApi, UpdateTagDto } from "../../services/api";
 
 interface TagEditProps {
   tag: Tag;
-  setTags: React.Dispatch<React.SetStateAction<Tag[]>>;
 }
 
-export const TagEdit: FunctionComponent<TagEditProps> = ({ tag, setTags }) => {
+export const TagEdit = ({ tag }: TagEditProps): JSX.Element => {
+  const queryClient = useQueryClient();
+  const mutation = useMutation(
+    (dto: UpdateTagDto) => TagsApi.update(dto.id, { title: dto.title }),
+    {
+      onMutate: async () => {
+        await queryClient.cancelQueries("tags");
+        const prevTags = queryClient.getQueryData<Tag[]>("tags");
+        if (prevTags) {
+          queryClient.setQueryData<Tag[]>(
+            "tags",
+            prevTags.map((prevTag) =>
+              prevTag.id === tag.id
+                ? Object.assign({}, prevTag, { title: newTagTitle })
+                : prevTag,
+            ),
+          );
+        }
+
+        return { prevTags };
+      },
+      onError: (_err, _vars, context) => {
+        if (context?.prevTags) {
+          queryClient.setQueryData("tags", context.prevTags);
+        }
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries("tags");
+      },
+    },
+  );
   const [newTagTitle, setNewTagTitle] = useState(tag.title);
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
@@ -30,25 +60,6 @@ export const TagEdit: FunctionComponent<TagEditProps> = ({ tag, setTags }) => {
 
   const handleClose = (): void => {
     setIsOpen(false);
-  };
-
-  const handleUpdate = (tag: Tag): void => {
-    setTags((prevState) =>
-      prevState.map((el) =>
-        el.id === tag.id ? Object.assign({}, el, { title: newTagTitle }) : el,
-      ),
-    );
-  };
-
-  const handleSave = async (): Promise<void> => {
-    try {
-      await TagsApi.update(tag.id, { title: newTagTitle });
-      handleClose();
-      handleUpdate(tag);
-      handleSnackbar("Tag successfully renamed");
-    } catch (e) {
-      handleSnackbar("Failed to rename tag");
-    }
   };
 
   return (
@@ -75,7 +86,25 @@ export const TagEdit: FunctionComponent<TagEditProps> = ({ tag, setTags }) => {
           <Button size="small" onClick={handleClose}>
             Cancel
           </Button>
-          <Button size="small" onClick={handleSave}>
+          <Button
+            size="small"
+            onClick={(): void => {
+              mutation.mutate(
+                { id: tag.id, title: newTagTitle },
+                {
+                  onSuccess: () => {
+                    handleSnackbar("Tag successfully renamed");
+                  },
+                  onError: () => {
+                    handleSnackbar("Could not rename tag", "error");
+                  },
+                  onSettled: () => {
+                    handleClose();
+                  },
+                },
+              );
+            }}
+          >
             Save
           </Button>
         </DialogActions>
