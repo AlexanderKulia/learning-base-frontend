@@ -14,7 +14,6 @@ export const NoteDelete = ({ note }: DeleteNoteProps): JSX.Element => {
     onMutate: async () => {
       await queryClient.cancelQueries("notes");
       const prevNotes = queryClient.getQueryData<Note[]>("notes");
-      console.log(prevNotes);
       if (prevNotes) {
         queryClient.setQueryData<Note[]>(
           "notes",

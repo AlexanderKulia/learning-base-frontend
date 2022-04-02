@@ -64,7 +64,9 @@ export const SignInPage = (): JSX.Element => {
             padding: ${theme.spacing(4)};
           `}
         >
-          <Typography variant="h5">Sign in</Typography>
+          <Typography variant="h5" id="title">
+            Sign in
+          </Typography>
           <form
             css={css`
               width: 100%;
@@ -104,6 +106,7 @@ export const SignInPage = (): JSX.Element => {
               css={css`
                 margin: ${theme.spacing(3, 0, 2)};
               `}
+              id="signIn"
             >
               Sign In
             </Button>

@@ -112,7 +112,7 @@ export const TagList = (): JSX.Element => {
   const renderTable = (): JSX.Element => {
     return (
       <TableContainer component={Paper}>
-        <Table>
+        <Table id="tags">
           <TableHead>
             <TableRow>
               <TableCell>

@@ -43,7 +43,7 @@ export const Drawer = (): JSX.Element => {
       >
         <List>
           {Object.keys(drawerItems).map((text: string) => (
-            <ListItem disablePadding button key={text}>
+            <ListItem id={`drawer${text}`} disablePadding button key={text}>
               <ListItemButton component={RouterLink} to={drawerItems[text]}>
                 <ListItemText primary={text} />
               </ListItemButton>

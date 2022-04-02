@@ -1,8 +1,5 @@
 module.exports = {
   parser: "@typescript-eslint/parser",
-  parserOptions: {
-    project: "tsconfig.json",
-  },
   env: {
     node: true,
   },
@@ -26,4 +23,12 @@ module.exports = {
       version: "detect",
     },
   },
+  overrides: [
+    {
+      files: ["*.ts", "*.tsx"],
+      parserOptions: {
+        project: ["./tsconfig.json"],
+      },
+    },
+  ],
 };

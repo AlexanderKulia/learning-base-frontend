@@ -94,11 +94,17 @@ export const AppBar = (): JSX.Element => {
               underline="none"
               component={RouterLink}
               to="/"
+              id="home"
             >
               Learning Base
             </Link>
           </Box>
-          <IconButton size="large" onClick={handleMenu} color="inherit">
+          <IconButton
+            size="large"
+            onClick={handleMenu}
+            color="inherit"
+            id="menu"
+          >
             <AccountCircle />
           </IconButton>
           <Menu
@@ -111,7 +117,7 @@ export const AppBar = (): JSX.Element => {
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
-            <MenuItem onClick={handleClose}>
+            <MenuItem onClick={handleClose} id="changePassword">
               <Link
                 color="inherit"
                 underline="none"
@@ -121,7 +127,9 @@ export const AppBar = (): JSX.Element => {
                 Change password
               </Link>
             </MenuItem>
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            <MenuItem onClick={handleLogout} id="logout">
+              Logout
+            </MenuItem>
           </Menu>
         </Toolbar>
       </MuiAppBar>

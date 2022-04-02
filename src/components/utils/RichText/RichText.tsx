@@ -3,9 +3,15 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { MenuBar } from "./MenuBar";
 
+export const emptyContent = [
+  '{"type":"doc","content":[]}',
+  '{"type":"doc","content":[{"type":"paragraph"}]}',
+];
+
 interface RichTextProps {
   content: string;
   onUpdate?: (content: string) => void;
+  setFieldTouched?: (field: string) => void;
   editable?: boolean;
   renderMenu?: boolean;
   maxHeight?: number;
@@ -13,7 +19,8 @@ interface RichTextProps {
 
 export const RichText = ({
   content,
-  onUpdate,
+  onUpdate = (): void => {},
+  setFieldTouched = (): void => {},
   editable = true,
   renderMenu = false,
   maxHeight = 500,
@@ -24,12 +31,13 @@ export const RichText = ({
       content: JSON.parse(content),
       editable,
       autofocus: "end",
-      onUpdate: onUpdate
-        ? ({ editor }): void => {
-            const json = editor.getJSON();
-            onUpdate(JSON.stringify(json));
-          }
-        : (): void => {},
+      onUpdate: ({ editor }): void => {
+        const json = editor.getJSON();
+        onUpdate(JSON.stringify(json));
+      },
+      onBlur: (): void => {
+        setFieldTouched("content");
+      },
     },
     [content],
   );

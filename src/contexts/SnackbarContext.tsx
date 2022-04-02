@@ -86,6 +86,7 @@ export const SnackbarProvider = ({ children }: SnackbarProps): JSX.Element => {
             css={css`
               width: 100%;
             `}
+            id="alert"
           >
             {message}
           </Alert>

@@ -23,7 +23,7 @@ import {
   TagsApi,
   UpdateNoteDto,
 } from "../../services/api/index";
-import { RichText } from "../utils/RichText/RichText";
+import { emptyContent, RichText } from "../utils/RichText/RichText";
 
 export interface NoteFormValues {
   id: number;
@@ -46,6 +46,20 @@ const formMessages = {
     success: "Note successfully updated",
     error: "Could not update note",
   },
+};
+
+const validate = (values: NoteFormValues): Partial<NoteFormValues> => {
+  const errors: Partial<NoteFormValues> = {};
+
+  if (!values.title) {
+    errors.title = "Required";
+  }
+
+  if (emptyContent.includes(values.content)) {
+    errors.content = "Required";
+  }
+
+  return errors;
 };
 
 export const NoteForm = ({
@@ -74,6 +88,7 @@ export const NoteForm = ({
   );
   const formik = useFormik({
     initialValues: { ...formValues, tag: "" },
+    validate,
     onSubmit: async ({ id, title, content, tags }) => {
       if (formType === "create")
         createMutation.mutate(
@@ -81,12 +96,10 @@ export const NoteForm = ({
           {
             onSuccess: () => {
               handleSnackbar(formMessages[formType]["success"]);
+              history.push("/");
             },
             onError: () => {
               handleSnackbar(formMessages[formType]["error"], "error");
-            },
-            onSettled: () => {
-              history.push("/");
             },
           },
         );
@@ -141,6 +154,13 @@ export const NoteForm = ({
       <TextField
         value={formik.values.title}
         onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
+        error={formik.touched.title && formik.errors.title ? true : false}
+        helperText={
+          formik.touched.title && formik.errors.title
+            ? formik.errors.title
+            : null
+        }
         margin="normal"
         required
         fullWidth
@@ -151,7 +171,10 @@ export const NoteForm = ({
       />
       <Box
         css={css`
-          border: 1px solid #c4c4c4;
+          border: 1px solid
+            ${formik.touched.content && formik.errors.content
+              ? "#d32f2f"
+              : "#c4c4c4"};
         `}
       >
         <RichText
@@ -159,9 +182,22 @@ export const NoteForm = ({
           onUpdate={(content): void => {
             formik.setFieldValue("content", content);
           }}
+          setFieldTouched={formik.setFieldTouched}
           renderMenu
         />
       </Box>
+      {formik.touched.content && formik.errors.content ? (
+        <p
+          css={css`
+            margin: 3px 14px 0px 14px;
+            font-size: 0.75rem;
+            color: #d32f2f;
+          `}
+          id="content-helper-text"
+        >
+          {formik.errors.content}
+        </p>
+      ) : null}
       <Autocomplete
         multiple
         size="small"

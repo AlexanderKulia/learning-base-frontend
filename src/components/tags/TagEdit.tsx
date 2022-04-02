@@ -76,6 +76,7 @@ export const TagEdit = ({ tag }: TagEditProps): JSX.Element => {
             size="small"
             value={newTagTitle}
             onChange={handeTagChange}
+            id="title"
           ></TextField>
         </DialogContent>
         <DialogActions
@@ -83,11 +84,12 @@ export const TagEdit = ({ tag }: TagEditProps): JSX.Element => {
             padding: ${theme.spacing(3)};
           `}
         >
-          <Button size="small" onClick={handleClose}>
+          <Button size="small" onClick={handleClose} id="cancel">
             Cancel
           </Button>
           <Button
             size="small"
+            id="submit"
             onClick={(): void => {
               mutation.mutate(
                 { id: tag.id, title: newTagTitle },

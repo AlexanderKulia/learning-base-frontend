@@ -82,7 +82,7 @@ export const NoteList = (): JSX.Element => {
     return (
       <>
         <Autocomplete
-          id="tags-filter"
+          id="tagsFilter"
           multiple
           disableCloseOnSelect
           size="small"
@@ -126,6 +126,7 @@ export const NoteList = (): JSX.Element => {
             css={css`
               margin-bottom: ${theme.spacing(1)};
             `}
+            id="new"
           >
             New
           </Button>
@@ -151,7 +152,7 @@ export const NoteList = (): JSX.Element => {
     if (!notesQuery.isSuccess) return <span>Failed to load notes</span>;
     const notes = notesQuery.data.data;
     if (Array.isArray(notes) && !notes.length)
-      return <span>No notes found</span>;
+      return <span id="noNotes">No notes found</span>;
 
     return notes.map(({ id, title, content, tags }, index: number) => {
       return (
@@ -170,10 +171,11 @@ export const NoteList = (): JSX.Element => {
               <CardHeader
                 title={title}
                 action={
-                  <IconButton>
+                  <IconButton id="delete">
                     <NoteDelete note={{ id, title, content, tags }} />
                   </IconButton>
                 }
+                id="cardHeader"
               />
               <CardActionArea
                 onClick={(): void => {
@@ -236,7 +238,7 @@ export const NoteList = (): JSX.Element => {
           </Grid>
           <Grid item md={4}>
             <TextField
-              id="notes-search"
+              id="notesSearch"
               value={searchTerm}
               onChange={(e): void => {
                 setSearchTerm(e.target.value);
@@ -259,7 +261,7 @@ export const NoteList = (): JSX.Element => {
       {notesQuery.isLoading ? (
         <Spinner />
       ) : (
-        <Grid container direction="row">
+        <Grid container direction="row" id="notesContainer">
           {renderNotes()}
         </Grid>
       )}

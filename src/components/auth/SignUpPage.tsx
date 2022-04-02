@@ -179,6 +179,7 @@ export const SignUpPage = (): JSX.Element => {
               css={css`
                 margin: ${theme.spacing(3, 0, 2)};
               `}
+              id="sign-up"
             >
               Sign Up
             </Button>
