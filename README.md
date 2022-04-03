@@ -2,7 +2,7 @@
 
 When you learn something, create a note and tag it. Later, filter your notes by tags to see what you have learned
 
-Disclaimer: This project could have been built using many fewer dependecies, but I wanted to learn the libraries I used here since they are very widely used and make developer experience better
+Disclaimer: This project could have been built using many fewer dependecies, but I wanted to learn the libraries I used here since they are very widely used and improve developer experience
 
 Stack:
 
