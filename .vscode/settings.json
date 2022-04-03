@@ -1,5 +1,0 @@
-{
-  "yaml.schemas": {
-    "https://json.schemastore.org/github-workflow.json": "file:///home/alexanderkulia/personal/learning-base/learning-base-frontend/.github/workflows/deploy.yml"
-  }
-}
