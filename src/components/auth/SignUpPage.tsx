@@ -9,6 +9,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { useFormik } from "formik";
+import { useEffect } from "react";
 import { Link as RouterLink, useHistory } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSnackbar } from "../../contexts/SnackbarContext";
@@ -52,8 +53,13 @@ interface FormValues {
 export const SignUpPage = (): JSX.Element => {
   const { handleSnackbar } = useSnackbar();
   const theme = useTheme();
-  const { signUp } = useAuth();
+  const { signUp, currentUser } = useAuth();
   const history = useHistory();
+
+  useEffect(() => {
+    if (currentUser) history.push("/");
+  }, []);
+
   const initialValues: FormValues = {
     email: "",
     password: "",
@@ -66,8 +72,12 @@ export const SignUpPage = (): JSX.Element => {
       try {
         await signUp(values.email, values.password);
         history.push("/signin");
-      } catch (error) {
-        handleSnackbar("Failed to create an account", "error");
+      } catch (error: any) {
+        if (error.statusCode === 409) {
+          handleSnackbar(error.message, "error");
+        } else {
+          handleSnackbar("Failed to create an account", "error");
+        }
       }
     },
   });

@@ -9,7 +9,8 @@ import {
   useTheme,
 } from "@mui/material";
 import { useFormik } from "formik";
-import { Link as RouterLink } from "react-router-dom";
+import { useEffect } from "react";
+import { Link as RouterLink, useHistory } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSnackbar } from "../../contexts/SnackbarContext";
 
@@ -21,7 +22,13 @@ interface FormValues {
 export const SignInPage = (): JSX.Element => {
   const { handleSnackbar } = useSnackbar();
   const theme = useTheme();
-  const { signIn } = useAuth();
+  const history = useHistory();
+  const { signIn, currentUser } = useAuth();
+
+  useEffect(() => {
+    if (currentUser) history.push("/");
+  }, []);
+
   const initialValues: FormValues = {
     email: "",
     password: "",
